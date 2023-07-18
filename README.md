@@ -22,6 +22,12 @@ to protein data fails to provide substantial insights.
 You can install PepSetTest like so:
 
 ``` r
+## If limma is not installed, run the following code:
+# if (!require("BiocManager", quietly = TRUE)) {
+#   install.packages("BiocManager")
+# }
+# BiocManager::install("limma")
+
 library(devtools)
 install_github("JmWangBio/PepSetTest")
 ```
