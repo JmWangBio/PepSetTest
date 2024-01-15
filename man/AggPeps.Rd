@@ -23,7 +23,7 @@ and "robreg" (robust regression with M-Estimation).}
 log-transformed}
 }
 \value{
-\code{AggPeps} returns a matrix of protein abundance values.
+\code{AggPeps} returns a list containing a matrix of protein abundance values and a vector of number of peptides
 }
 \description{
 Given peptide abundance and assignment of peptide sequences to proteins,

@@ -4,20 +4,21 @@
 \alias{EnframeContrastsRes}
 \title{Enframe result of LIMMA analysis}
 \usage{
-EnframeContrastsRes(eBayes.fit)
+EnframeContrastsRes(eBayes.fit, eb = TRUE)
 }
 \arguments{
 \item{eBayes.fit}{output from \code{FitContrasts}. See ?\code{limma::eBayes} for details.}
+
+\item{eb}{logical, whether to output the result from the empirical Bayes or ordinary approach.}
 }
 \value{
 \code{EnframeContrastsRes} returns a dataframe containing the following columns
 \item{feature}{unique feature identifier}
 \item{logFC}{log2 fold change}
-\item{AveExpr}{average log2 feature expression}
 \item{t}{t-statistic}
 \item{P.Value}{raw p-value}
 \item{adj.P.Val}{p-value adjusted via the Benjamini-Hochberg method}
-\item{B}{B-statistic}
+\item{B}{B-statistic (empirical Bayes only)}
 }
 \description{
 Convert result of LIMMA analysis into a dataframe.

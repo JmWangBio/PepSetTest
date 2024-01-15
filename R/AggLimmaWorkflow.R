@@ -9,15 +9,17 @@
 #' if group B is to be compared against group A)
 #' @param group list of group levels corresponding to each sample. The order of group
 #' levels needs to match that of samples in the peptide abundance table.
+#' @param npep.trend logical, should a number-of-peptide-trend be allowed for the prior
+#' variance? Default is constant prior variance.
+#' @param eb logical, whether to output the result from the empirical Bayes or ordinary approach.
 #'
 #' @return \code{AggLimmaWorkflow} returns a dataframe containing the following columns
 #' \item{feature}{unique protein identifier}
 #' \item{logFC}{log2 fold change}
-#' \item{AveExpr}{average log2 protein expression}
 #' \item{t}{t-statistic}
 #' \item{P.Value}{raw p-value}
 #' \item{adj.P.Val}{p-value adjusted via the Benjamini-Hochberg method}
-#' \item{B}{B-statistic}
+#' \item{B}{B-statistic (empirical Bayes only)}
 #' @export
 #'
 #' @author Junmin Wang
@@ -46,14 +48,22 @@
 AggLimmaWorkflow <- function(dat, contrasts.par, group,
                              pep_mapping_tbl,
                              method = c("sum", "robreg"),
-                             logged = c(TRUE, FALSE)) {
+                             logged = c(TRUE, FALSE),
+                             npep.trend = FALSE,
+                             eb = TRUE) {
   ## aggregate peptides
-  prot.dat <- AggPeps(dat, pep_mapping_tbl, method, logged = logged)
+  prot.dat.lst <- AggPeps(dat, pep_mapping_tbl, method, logged = logged)
+  ## break list into abundance matrix and NPeptide vector
+  prot.dat <- prot.dat.lst$int
+  prot.NPeptide <- NULL
+  if (npep.trend) {
+    prot.NPeptide <- prot.dat.lst$NPeptide
+  }
   ## fit statistical model
   eBayes.fit <- FitContrasts(prot.dat, contrasts.par,
-                             group, logged = TRUE)
+                             group, logged = TRUE, NPeptide = prot.NPeptide)
   ## convert eBayes.fit to dataframe
-  contrasts.res <- EnframeContrastsRes(eBayes.fit = eBayes.fit) %>%
+  contrasts.res <- EnframeContrastsRes(eBayes.fit = eBayes.fit, eb = eb) %>%
     dplyr::rename("protein" = "feature")
   return(contrasts.res)
 }

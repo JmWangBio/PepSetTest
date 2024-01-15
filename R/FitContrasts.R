@@ -8,6 +8,7 @@
 #' @param group list of group levels corresponding to each sample. The order of group
 #' levels needs to match that of samples in the feature abundance table.
 #' @param logged Boolean variable indicating whether data have been log-transformed
+#' @param NPeptide numeric vector indicating number of peptides aggregated for each protein. logNPeptide will be passed to limma-trend. Constant prior variance if null.
 #'
 #' @return \code{FitContrasts} returns an object of class \code{MArrayLM}. See ?\code{limma::eBayes} for details.
 #' @export
@@ -28,7 +29,8 @@
 #'
 #' FitContrasts(dat, contrasts.par, group)
 #'
-FitContrasts <- function(dat, contrasts.par, group, logged = FALSE) {
+FitContrasts <- function(dat, contrasts.par, group, 
+                         logged = FALSE, NPeptide = NULL) {
   if (logged) {
     dat.m <- as.matrix(dat)
   } else {
@@ -39,7 +41,13 @@ FitContrasts <- function(dat, contrasts.par, group, logged = FALSE) {
   colnames(design.m) <- levels(group)
   fit <- limma::lmFit(dat.m, design.m)
   contrs <- limma::makeContrasts(contrasts = contrasts.par,
-                          levels = design.m)
-  eBayes.fit <- limma::eBayes(limma::contrasts.fit(fit, contrs))
+                                 levels = design.m)
+  trend <- FALSE
+  if (!is.null(NPeptide)) {
+    fit$Amean <- log(NPeptide)
+    trend <- TRUE
+  }
+  eBayes.fit <- limma::eBayes(limma::contrasts.fit(fit, contrs),
+                              trend = trend)
   return(eBayes.fit)
 }

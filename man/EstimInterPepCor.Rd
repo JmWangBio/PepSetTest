@@ -7,7 +7,7 @@
 EstimInterPepCor(
   dat,
   contrasts.par,
-  design.m,
+  group,
   pep_mapping_tbl,
   equal.correlation = FALSE,
   logged = FALSE
@@ -19,14 +19,16 @@ EstimInterPepCor(
 \item{contrasts.par}{group levels to be compared separated by dash (e.g., "B-A"
 if group B is to be compared against group A)}
 
-\item{design.m}{design matrix}
+\item{group}{list of group levels corresponding to each sample. The order of group
+levels needs to match that of samples in the feature abundance table.}
 
 \item{pep_mapping_tbl}{a table mapping peptides to proteins. "pep_mapping_tbl" and "dat" should contain the same peptides.}
 
 \item{equal.correlation}{Boolean variable indicating whether all pairwise
 inter-peptide correlation coefficients are assumed to be equal within a protein.
 If true, the mixed model approach will be applied; otherwise, the approach
-described in Wu and Smyth (2012), \emph{Nucleic Acids Research} will be applied.}
+described in Wu and Smyth (2012), \emph{Nucleic Acids Research} will be applied.
+In either case, only non-negative mean correlations are allowed.}
 
 \item{logged}{Boolean variable indicating whether data have been log-transformed}
 }
@@ -53,11 +55,7 @@ protein = paste0("Protein", rep(1:30, each = 3)))
 group <- c(rep("A", 3), rep("B", 3))
 contrasts.par <- "B-A"
 
-# Generate design matrix
-group <- factor(group)
-design.m <- stats::model.matrix(~ 0 + group)
-
-EstimInterPepCor(dat, contrasts.par, design.m, pep_mapping_tbl,
+EstimInterPepCor(dat, contrasts.par, group, pep_mapping_tbl,
 equal.correlation = TRUE, logged = FALSE)
 
 }

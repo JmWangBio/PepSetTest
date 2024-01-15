@@ -19,9 +19,10 @@
 #' FitLmerBySample(y, design)
 #'
 FitLmerBySample <- function(y, design) {
-  qrdesign <- qr(design)
-  y <- qr.resid(qrdesign, t(y))
-  y <- t(y)
+  y <- t(apply(t(y), 2, function(ycol) {
+    X <- design[!is.na(ycol), , drop = FALSE]
+    ycol - design %*% solve(t(X) %*% X) %*% t(X) %*% t(t(ycol[!is.na(ycol)]))
+  }))
   y_long <- reshape2::melt(y)
   colnames(y_long) <- c("feature" , "sample", "val")
   fit <- lme4::lmer(val ~ 1|sample, data = y_long)

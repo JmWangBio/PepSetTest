@@ -10,7 +10,9 @@ AggLimmaWorkflow(
   group,
   pep_mapping_tbl,
   method = c("sum", "robreg"),
-  logged = c(TRUE, FALSE)
+  logged = c(TRUE, FALSE),
+  npep.trend = FALSE,
+  eb = TRUE
 )
 }
 \arguments{
@@ -29,16 +31,20 @@ and "robreg" (robust regression with M-Estimation).}
 
 \item{logged}{Boolean variable indicating whether abundance data have been
 log-transformed}
+
+\item{npep.trend}{logical, should a number-of-peptide-trend be allowed for the prior
+variance? Default is constant prior variance.}
+
+\item{eb}{logical, whether to output the result from the empirical Bayes or ordinary approach.}
 }
 \value{
 \code{AggLimmaWorkflow} returns a dataframe containing the following columns
 \item{feature}{unique protein identifier}
 \item{logFC}{log2 fold change}
-\item{AveExpr}{average log2 protein expression}
 \item{t}{t-statistic}
 \item{P.Value}{raw p-value}
 \item{adj.P.Val}{p-value adjusted via the Benjamini-Hochberg method}
-\item{B}{B-statistic}
+\item{B}{B-statistic (empirical Bayes only)}
 }
 \description{
 Given peptide abundance and assignment of peptide sequences to proteins,

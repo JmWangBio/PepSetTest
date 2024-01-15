@@ -5,7 +5,8 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
                                  nTotalPeps = c(4200, 3600, 1200), 
                                  inter.pep.cor = 0.05, 
                                  nSamples = 3, 
-                                 percDEG = 0.05) {
+                                 percDEG = 0.05,
+                                 npep.trend = FALSE) {
   ####################
   ## run simulation ##
   ####################
@@ -71,7 +72,8 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
                                       group = group,
                                       pep_mapping_tbl = pep_mapping_tbl,
                                       method = "sum", 
-                                      logged = TRUE)
+                                      logged = TRUE,
+                                      npep.trend = npep.trend)
   
   ## run protein LIMMA with robust regression
   robRegLimma_output <- AggLimmaWorkflow(dat = AllDat,
@@ -79,37 +81,44 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
                                          group = group,
                                          pep_mapping_tbl = pep_mapping_tbl,
                                          method = "robreg", 
-                                         logged = TRUE)
+                                         logged = TRUE,
+                                         npep.trend = npep.trend)
   
   ## run peptide set test
-  pepSetTest_eq_corr_mad_output <- PepSetTestWorkflow(dat = AllDat, 
-                                                      contrasts.par = contrasts.par,
-                                                      group = group,
-                                                      pep_mapping_tbl = pep_mapping_tbl,
-                                                      stats = "t", 
-                                                      correlated = TRUE,
-                                                      equal.correlation = TRUE,
-                                                      pepC.estim = "mad",
-                                                      logged = TRUE)
+  pepSetTest_eq_corr_mad_output <- CompPepSetTestWorkflow(dat = AllDat, 
+                                                          contrasts.par = contrasts.par,
+                                                          group = group,
+                                                          pep_mapping_tbl = pep_mapping_tbl,
+                                                          stats = "t", 
+                                                          correlated = TRUE,
+                                                          equal.correlation = TRUE,
+                                                          pepC.estim = "mad",
+                                                          logged = TRUE)
   
-  pepSetTest_eq_corr_sd_output <- PepSetTestWorkflow(dat = AllDat, 
-                                                     contrasts.par = contrasts.par,
-                                                     group = group,
-                                                     pep_mapping_tbl = pep_mapping_tbl,
-                                                     stats = "t", 
-                                                     correlated = TRUE,
-                                                     equal.correlation = TRUE,
-                                                     pepC.estim = "sd",
-                                                     logged = TRUE)
+  pepSetTest_eq_corr_sd_output <- CompPepSetTestWorkflow(dat = AllDat, 
+                                                         contrasts.par = contrasts.par,
+                                                         group = group,
+                                                         pep_mapping_tbl = pep_mapping_tbl,
+                                                         stats = "t", 
+                                                         correlated = TRUE,
+                                                         equal.correlation = TRUE,
+                                                         pepC.estim = "sd",
+                                                         logged = TRUE)
   
-  pepSetTest_uneq_corr_output <- PepSetTestWorkflow(dat = AllDat, 
+  pepSetTest_uneq_corr_output <- CompPepSetTestWorkflow(dat = AllDat, 
+                                                        contrasts.par = contrasts.par,
+                                                        group = group,
+                                                        pep_mapping_tbl = pep_mapping_tbl,
+                                                        stats = "t", 
+                                                        correlated = TRUE,
+                                                        equal.correlation = FALSE,
+                                                        pepC.estim = "sd",
+                                                        logged = TRUE)
+
+  scPepSetTest_output <- SelfContPepSetTestWorkflow(dat = AllDat,
                                                     contrasts.par = contrasts.par,
                                                     group = group,
                                                     pep_mapping_tbl = pep_mapping_tbl,
-                                                    stats = "t", 
-                                                    correlated = TRUE,
-                                                    equal.correlation = FALSE,
-                                                    pepC.estim = "sd",
                                                     logged = TRUE)
   
   ## retrieve P values
@@ -126,6 +135,9 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
   pepSetTest.uneq.corr.pval <- pepSetTest_uneq_corr_output %>%
     dplyr::arrange(protein) %>%
     dplyr::pull(PValue)
+  scPepSetTest.pval <- scPepSetTest_output %>%
+    dplyr::arrange(protein) %>%
+    dplyr::pull(PValue)
   
   pval.df <- data.frame( protein = proteins,
                          nTestPep = num.peps,
@@ -133,7 +145,8 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
                          robRegLimma = robRegLimma.pval,
                          pepSetTestEqCorrMAD = pepSetTest.eq.corr.mad.pval,
                          pepSetTestEqCorrSD = pepSetTest.eq.corr.sd.pval,
-                         pepSetTestUneqCorr = pepSetTest.uneq.corr.pval )
+                         pepSetTestUneqCorr = pepSetTest.uneq.corr.pval,
+                         scPepSetTest = scPepSetTest.pval )
   pval.df$mu <- 0
   pval.df[pval.df$protein %in% paste0("Protein", up_DE_prot_index), "mu"] <- GroupDiff
   pval.df[pval.df$protein %in% paste0("Protein", down_DE_prot_index), "mu"] <- -GroupDiff
@@ -147,7 +160,8 @@ main_sim_active_uncorr <- function(GroupDiff = 0.5,
                                    nTotalPeps = c(4200, 3600, 1200), 
                                    inter.pep.cor = 0, 
                                    nSamples = 3, 
-                                   percDEG = 0.05) {
+                                   percDEG = 0.05,
+                                   npep.trend = FALSE) {
   ####################
   ## run simulation ##
   ####################
@@ -213,7 +227,8 @@ main_sim_active_uncorr <- function(GroupDiff = 0.5,
                                       group = group,
                                       pep_mapping_tbl = pep_mapping_tbl,
                                       method = "sum", 
-                                      logged = TRUE)
+                                      logged = TRUE,
+                                      npep.trend = npep.trend)
   
   ## run protein LIMMA with robust regression
   robRegLimma_output <- AggLimmaWorkflow(dat = AllDat,
@@ -221,29 +236,36 @@ main_sim_active_uncorr <- function(GroupDiff = 0.5,
                                          group = group,
                                          pep_mapping_tbl = pep_mapping_tbl,
                                          method = "robreg", 
-                                         logged = TRUE)
+                                         logged = TRUE,
+                                         npep.trend = npep.trend)
   
   ## run peptide set test
-  pepSetTest_mad_output <- PepSetTestWorkflow(dat = AllDat, 
-                                              contrasts.par = contrasts.par,
-                                              group = group,
-                                              pep_mapping_tbl = pep_mapping_tbl,
-                                              stats = "t", 
-                                              correlated = FALSE,
-                                              equal.correlation = FALSE,
-                                              pepC.estim = "mad",
-                                              logged = TRUE)
+  pepSetTest_mad_output <- CompPepSetTestWorkflow(dat = AllDat, 
+                                                  contrasts.par = contrasts.par,
+                                                  group = group,
+                                                  pep_mapping_tbl = pep_mapping_tbl,
+                                                  stats = "t", 
+                                                  correlated = FALSE,
+                                                  equal.correlation = FALSE,
+                                                  pepC.estim = "mad",
+                                                  logged = TRUE)
   
-  pepSetTest_sd_output <- PepSetTestWorkflow(dat = AllDat, 
-                                             contrasts.par = contrasts.par,
-                                             group = group,
-                                             pep_mapping_tbl = pep_mapping_tbl,
-                                             stats = "t", 
-                                             correlated = FALSE,
-                                             equal.correlation = FALSE,
-                                             pepC.estim = "sd",
-                                             logged = TRUE)
-  
+  pepSetTest_sd_output <- CompPepSetTestWorkflow(dat = AllDat, 
+                                                 contrasts.par = contrasts.par,
+                                                 group = group,
+                                                 pep_mapping_tbl = pep_mapping_tbl,
+                                                 stats = "t", 
+                                                 correlated = FALSE,
+                                                 equal.correlation = FALSE,
+                                                 pepC.estim = "sd",
+                                                 logged = TRUE)
+
+  scPepSetTest_output <- SelfContPepSetTestWorkflow(dat = AllDat,
+                                                    contrasts.par = contrasts.par,
+                                                    group = group,
+                                                    pep_mapping_tbl = pep_mapping_tbl,
+                                                    logged = TRUE)
+    
   ## retrieve P values
   proteins <- sumLimma_output %>% dplyr::arrange(protein) %>% dplyr::pull(protein)
   num.peps <- pepSetTest_mad_output %>% dplyr::arrange(protein) %>% dplyr::pull(NPeps)
@@ -255,13 +277,17 @@ main_sim_active_uncorr <- function(GroupDiff = 0.5,
   pepSetTest.sd.pval <- pepSetTest_sd_output %>%
     dplyr::arrange(protein) %>%
     dplyr::pull(PValue)
+  scPepSetTest.pval <- scPepSetTest_output %>%
+    dplyr::arrange(protein) %>%
+    dplyr::pull(PValue)
   
   pval.df <- data.frame( protein = proteins,
                          nTestPep = num.peps,
                          sumLimma = sumLimma.pval,
                          robRegLimma = robRegLimma.pval,
                          pepSetTestMAD = pepSetTest.mad.pval,
-                         pepSetTestSD = pepSetTest.sd.pval )
+                         pepSetTestSD = pepSetTest.sd.pval,
+                         scPepSetTest = scPepSetTest.pval )
   pval.df$mu <- 0
   pval.df[pval.df$protein %in% paste0("Protein", up_DE_prot_index), "mu"] <- GroupDiff
   pval.df[pval.df$protein %in% paste0("Protein", down_DE_prot_index), "mu"] <- -GroupDiff
@@ -273,7 +299,8 @@ main_sim_active_uncorr <- function(GroupDiff = 0.5,
 main_sim_inactive_corr <- function(nTestPeps = c(3, 10, 30), 
                                    nTotalPeps = c(4200, 3600, 1200), 
                                    inter.pep.cor = 0.05, 
-                                   nSamples = 3) {
+                                   nSamples = 3,
+                                   npep.trend = FALSE) {
   ####################
   ## run simulation ##
   ####################
@@ -319,7 +346,8 @@ main_sim_inactive_corr <- function(nTestPeps = c(3, 10, 30),
                                       group = group,
                                       pep_mapping_tbl = pep_mapping_tbl,
                                       method = "sum", 
-                                      logged = TRUE)
+                                      logged = TRUE,
+                                      npep.trend = npep.trend)
   
   ## run protein LIMMA with robust regression
   robRegLimma_output <- AggLimmaWorkflow(dat = AllDat,
@@ -327,27 +355,34 @@ main_sim_inactive_corr <- function(nTestPeps = c(3, 10, 30),
                                          group = group,
                                          pep_mapping_tbl = pep_mapping_tbl,
                                          method = "robreg", 
-                                         logged = TRUE)
+                                         logged = TRUE,
+                                         npep.trend = npep.trend)
   
   ## run peptide set test
-  pepSetTest_eq_corr_sd_output <- PepSetTestWorkflow(dat = AllDat, 
-                                                     contrasts.par = contrasts.par,
-                                                     group = group,
-                                                     pep_mapping_tbl = pep_mapping_tbl,
-                                                     stats = "t", 
-                                                     correlated = TRUE,
-                                                     equal.correlation = TRUE,
-                                                     pepC.estim = "sd",
-                                                     logged = TRUE)
+  pepSetTest_eq_corr_sd_output <- CompPepSetTestWorkflow(dat = AllDat, 
+                                                         contrasts.par = contrasts.par,
+                                                         group = group,
+                                                         pep_mapping_tbl = pep_mapping_tbl,
+                                                         stats = "t", 
+                                                         correlated = TRUE,
+                                                         equal.correlation = TRUE,
+                                                         pepC.estim = "sd",
+                                                         logged = TRUE)
   
-  pepSetTest_uneq_corr_output <- PepSetTestWorkflow(dat = AllDat, 
+  pepSetTest_uneq_corr_output <- CompPepSetTestWorkflow(dat = AllDat, 
+                                                        contrasts.par = contrasts.par,
+                                                        group = group,
+                                                        pep_mapping_tbl = pep_mapping_tbl,
+                                                        stats = "t", 
+                                                        correlated = TRUE,
+                                                        equal.correlation = FALSE,
+                                                        pepC.estim = "sd",
+                                                        logged = TRUE)
+  
+  scPepSetTest_output <- SelfContPepSetTestWorkflow(dat = AllDat,
                                                     contrasts.par = contrasts.par,
                                                     group = group,
                                                     pep_mapping_tbl = pep_mapping_tbl,
-                                                    stats = "t", 
-                                                    correlated = TRUE,
-                                                    equal.correlation = FALSE,
-                                                    pepC.estim = "sd",
                                                     logged = TRUE)
   
   ## retrieve P values
@@ -361,13 +396,17 @@ main_sim_inactive_corr <- function(nTestPeps = c(3, 10, 30),
   pepSetTest.uneq.corr.pval <- pepSetTest_uneq_corr_output %>%
     dplyr::arrange(protein) %>%
     dplyr::pull(PValue)
+  scPepSetTest.pval <- scPepSetTest_output %>%
+    dplyr::arrange(protein) %>%
+    dplyr::pull(PValue)
   
   pval.df <- data.frame( protein = proteins,
                          nTestPep = num.peps,
                          sumLimma = sumLimma.pval,
                          robRegLimma = robRegLimma.pval,
                          pepSetTestEqCorrSD = pepSetTest.eq.corr.sd.pval,
-                         pepSetTestUneqCorr = pepSetTest.uneq.corr.pval )
+                         pepSetTestUneqCorr = pepSetTest.uneq.corr.pval,
+                         scPepSetTest = scPepSetTest.pval )
   pval.df$mu <- 0
   return(pval.df)
 }
@@ -377,7 +416,8 @@ main_sim_inactive_corr <- function(nTestPeps = c(3, 10, 30),
 main_sim_inactive_uncorr <- function(nTestPeps = c(3, 10, 30), 
                                      nTotalPeps = c(4200, 3600, 1200), 
                                      inter.pep.cor = 0, 
-                                     nSamples = 3) {
+                                     nSamples = 3,
+                                     npep.trend = FALSE) {
   ####################
   ## run simulation ##
   ####################
@@ -423,7 +463,8 @@ main_sim_inactive_uncorr <- function(nTestPeps = c(3, 10, 30),
                                       group = group,
                                       pep_mapping_tbl = pep_mapping_tbl,
                                       method = "sum", 
-                                      logged = TRUE)
+                                      logged = TRUE,
+                                      npep.trend = npep.trend)
   
   ## run protein LIMMA with robust regression
   robRegLimma_output <- AggLimmaWorkflow(dat = AllDat,
@@ -431,17 +472,24 @@ main_sim_inactive_uncorr <- function(nTestPeps = c(3, 10, 30),
                                          group = group,
                                          pep_mapping_tbl = pep_mapping_tbl,
                                          method = "robreg", 
-                                         logged = TRUE)
+                                         logged = TRUE,
+                                         npep.trend = npep.trend)
   
-  pepSetTest_sd_output <- PepSetTestWorkflow(dat = AllDat, 
-                                             contrasts.par = contrasts.par,
-                                             group = group,
-                                             pep_mapping_tbl = pep_mapping_tbl,
-                                             stats = "t", 
-                                             correlated = FALSE,
-                                             equal.correlation = FALSE,
-                                             pepC.estim = "sd",
-                                             logged = TRUE)
+  pepSetTest_sd_output <- CompPepSetTestWorkflow(dat = AllDat, 
+                                                 contrasts.par = contrasts.par,
+                                                 group = group,
+                                                 pep_mapping_tbl = pep_mapping_tbl,
+                                                 stats = "t", 
+                                                 correlated = FALSE,
+                                                 equal.correlation = FALSE,
+                                                 pepC.estim = "sd",
+                                                 logged = TRUE)
+  
+  scPepSetTest_output <- SelfContPepSetTestWorkflow(dat = AllDat,
+                                                    contrasts.par = contrasts.par,
+                                                    group = group,
+                                                    pep_mapping_tbl = pep_mapping_tbl,
+                                                    logged = TRUE)
   
   ## retrieve P values
   proteins <- sumLimma_output %>% dplyr::arrange(protein) %>% dplyr::pull(protein)
@@ -451,12 +499,16 @@ main_sim_inactive_uncorr <- function(nTestPeps = c(3, 10, 30),
   pepSetTest.sd.pval <- pepSetTest_sd_output %>%
     dplyr::arrange(protein) %>%
     dplyr::pull(PValue)
+  scPepSetTest.pval <- scPepSetTest_output %>%
+    dplyr::arrange(protein) %>%
+    dplyr::pull(PValue)
   
   pval.df <- data.frame( protein = proteins,
                          nTestPep = num.peps,
                          sumLimma = sumLimma.pval,
                          robRegLimma = robRegLimma.pval,
-                         pepSetTestSD = pepSetTest.sd.pval )
+                         pepSetTestSD = pepSetTest.sd.pval,
+                         scPepSetTest = scPepSetTest.pval )
   pval.df$mu <- 0
   return(pval.df)
 }

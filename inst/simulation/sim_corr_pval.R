@@ -1,6 +1,6 @@
 
 ## Author: Junmin Wang
-## Date: June 22nd, 2023
+## Date: January 15th, 2024
 ## IMPORTANT NOTE: To run this script successfully, you need to have the dplyr, MASS, and PepSetTest R packages installed.
 ## Also, please make sure to provide the correct path to "helper.R".
 ## This script can produce four simulated datasets with rho set to 0.05: a mixture of proteins (5% active), proteins with equal peptide distributions (5% active), a mixture of proteins (0% active), and proteins with equal peptide distributions (0% active).
@@ -27,6 +27,7 @@ source("path/to/helper.R")
 # pepSetTestEqCorrMAD: p-value obtained from peptide set test (mixed-model, MAD)
 # pepSetTestEqCorrSD: p-value obtained from peptide set test (mixed-model, SD)
 # pepSetTestUneqCorr: p-value obtained from peptide set test (Wu et al, SD)
+# scPepSetTest: p-value obtained from self-contained peptide set test
 
 ####################################################
 #### simulate a mixture of proteins (5% active) ####
@@ -47,7 +48,8 @@ for (n in 1:length(nSamples_lst)) {
                                     nTotalPeps = c(4200, 3600, 1200),
                                     inter.pep.cor = interPepCor,
                                     nSamples = nSamples_lst[n],
-                                    percDEG = 0.05)
+                                    percDEG = 0.05,
+                                    npep.trend = TRUE)
     pval.df$Iteration <- k
     return(pval.df)
   }))
@@ -82,7 +84,8 @@ for (n in 1:length(nSamples_lst)) {
                                       nTotalPeps = 9000,
                                       inter.pep.cor = interPepCor,
                                       nSamples = nSamples_lst[n],
-                                      percDEG = 0.05)
+                                      percDEG = 0.05,
+                                      npep.trend = FALSE)
       pval.df$Iteration <- k
       return(pval.df)
     }))
@@ -113,7 +116,8 @@ for (n in 1:length(nSamples_lst)) {
     pval.df <- main_sim_inactive_corr(nTestPeps = c(3, 10, 30),
                                       nTotalPeps = c(4200, 3600, 1200),
                                       inter.pep.cor = interPepCor,
-                                      nSamples = nSamples_lst[n])
+                                      nSamples = nSamples_lst[n],
+                                      npep.trend = TRUE)
     pval.df$Iteration <- k
     return(pval.df)
   }))
@@ -146,7 +150,8 @@ for (n in 1:length(nSamples_lst)) {
       pval.df <- main_sim_inactive_corr(nTestPeps = nTestPeps_lst[m],
                                         nTotalPeps = 9000,
                                         inter.pep.cor = interPepCor,
-                                        nSamples = nSamples_lst[n])
+                                        nSamples = nSamples_lst[n],
+                                        npep.trend = FALSE)
       pval.df$Iteration <- k
       return(pval.df)
     }))

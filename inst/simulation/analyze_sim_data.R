@@ -1,6 +1,6 @@
 
 ## Author: Junmin Wang
-## Date: June 22nd, 2023
+## Date: January 15th, 2024
 ## IMPORTANT NOTE: To run this script successfully, you need to have the dplyr R package installed.
 ## This script can calculate the power and Type I error rate of the statistical methods applied to the simulation data.
 ## Increasing the number of simulations in "sim_corr_val.R" and "sim_uncorr_val.R" will provide a more accurate estimation of power and Type I error rates.
@@ -36,11 +36,13 @@ type1.err.rate.wide <- calc_sig_perc(pval.all.df.zero, methods = c("sumLimma",
                                                                    "robRegLimma",
                                                                    "pepSetTestEqCorrMAD",
                                                                    "pepSetTestEqCorrSD",
-                                                                   "pepSetTestUneqCorr"))
+                                                                   "pepSetTestUneqCorr",
+                                                                   "scPepSetTest"))
 
 ## power
 power.wide <- calc_sig_perc(pval.all.df.posneg, methods = c("sumLimma", 
                                                             "robRegLimma",
                                                             "pepSetTestEqCorrMAD",
                                                             "pepSetTestEqCorrSD",
-                                                            "pepSetTestUneqCorr"))
+                                                            "pepSetTestUneqCorr",
+                                                            "scPepSetTest"))

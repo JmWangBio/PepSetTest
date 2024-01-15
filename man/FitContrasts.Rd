@@ -4,7 +4,7 @@
 \alias{FitContrasts}
 \title{Empirical Bayes moderated t-test}
 \usage{
-FitContrasts(dat, contrasts.par, group, logged = FALSE)
+FitContrasts(dat, contrasts.par, group, logged = FALSE, NPeptide = NULL)
 }
 \arguments{
 \item{dat}{a dataframe or matrix of feature (e.g., peptide, protein) abundance}
@@ -16,6 +16,8 @@ if group B is to be compared against group A)}
 levels needs to match that of samples in the feature abundance table.}
 
 \item{logged}{Boolean variable indicating whether data have been log-transformed}
+
+\item{NPeptide}{numeric vector indicating number of peptides aggregated for each protein. logNPeptide will be passed to limma-trend. Constant prior variance if null.}
 }
 \value{
 \code{FitContrasts} returns an object of class \code{MArrayLM}. See ?\code{limma::eBayes} for details.

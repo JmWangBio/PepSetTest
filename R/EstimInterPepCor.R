@@ -6,11 +6,11 @@
 #'
 #' @inheritParams FitContrasts
 #' @inheritParams AggPeps
-#' @param design.m design matrix
 #' @param equal.correlation Boolean variable indicating whether all pairwise
 #' inter-peptide correlation coefficients are assumed to be equal within a protein.
 #' If true, the mixed model approach will be applied; otherwise, the approach
 #' described in Wu and Smyth (2012), \emph{Nucleic Acids Research} will be applied.
+#' In either case, only non-negative mean correlations are allowed.
 #'
 #' @return \code{EstimInterPepCor} returns a numeric vector of inter-peptide
 #' correlation coefficients (one value for each protein).
@@ -34,18 +34,13 @@
 #' group <- c(rep("A", 3), rep("B", 3))
 #' contrasts.par <- "B-A"
 #'
-#' # Generate design matrix
-#' group <- factor(group)
-#' design.m <- stats::model.matrix(~ 0 + group)
-#' 
-#' EstimInterPepCor(dat, contrasts.par, design.m, pep_mapping_tbl,
+#' EstimInterPepCor(dat, contrasts.par, group, pep_mapping_tbl,
 #' equal.correlation = TRUE, logged = FALSE)
 #'
-EstimInterPepCor <- function(dat, contrasts.par, design.m,
+EstimInterPepCor <- function(dat, contrasts.par, group,
                              pep_mapping_tbl,
                              equal.correlation = FALSE,
                              logged = FALSE) {
-  dat <- dat[stats::complete.cases(dat), ]
   if (logged) {
     dat.m <- as.matrix(dat)
   } else {
@@ -61,6 +56,8 @@ EstimInterPepCor <- function(dat, contrasts.par, design.m,
   })
   names(pep_lst) <- target_prot_ids
   ## calculate correlation
+  group <- factor(group)
+  design.m <- stats::model.matrix(~ 0 + group)
   inter.pep.cor.lst <-
     sapply(target_prot_ids, function(x) {
       if (length(pep_lst[[x]]) >= 2) {
@@ -70,6 +67,7 @@ EstimInterPepCor <- function(dat, contrasts.par, design.m,
         } else {
           inter.pep.cor <- limma::interGeneCorrelation(dat.m[pep_lst[[x]], ],
                                                        design.m)$correlation
+          inter.pep.cor[inter.pep.cor < 0] <- 0
         }
       } else {
         inter.pep.cor <- NA

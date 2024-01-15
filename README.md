@@ -28,6 +28,9 @@ You can install PepSetTest like so:
 # }
 # BiocManager::install("limma")
 
+## If statmod is not installed, run the following code:
+# install.packages("statmod")
+
 library(devtools)
 install_github("JmWangBio/PepSetTest")
 ```
@@ -85,14 +88,14 @@ workflow as follows:
 
 ``` r
 # Run the workflow
-result <- PepSetTestWorkflow(dat, contrasts.par = contrasts.par,
-                             group = group,
-                             pep_mapping_tbl = pep_mapping_tbl,
-                             stats = "t",
-                             correlated = FALSE,
-                             equal.correlation = FALSE,
-                             pepC.estim = "mad",
-                             logged = FALSE)
+result <- CompPepSetTestWorkflow(dat, contrasts.par = contrasts.par,
+                                 group = group,
+                                 pep_mapping_tbl = pep_mapping_tbl,
+                                 stats = "t",
+                                 correlated = FALSE,
+                                 equal.correlation = FALSE,
+                                 pepC.estim = "mad",
+                                 logged = FALSE)
 ```
 
 The above workflow assumes that the peptides are not correlated and
@@ -108,14 +111,14 @@ the workflow as follows:
 
 ``` r
 # Run the workflow
-result <- PepSetTestWorkflow(dat, contrasts.par = contrasts.par,
-                             group = group,
-                             pep_mapping_tbl = pep_mapping_tbl,
-                             stats = "t",
-                             correlated = TRUE,
-                             equal.correlation = TRUE,
-                             pepC.estim = "mad",
-                             logged = FALSE)
+result <- CompPepSetTestWorkflow(dat, contrasts.par = contrasts.par,
+                                 group = group,
+                                 pep_mapping_tbl = pep_mapping_tbl,
+                                 stats = "t",
+                                 correlated = TRUE,
+                                 equal.correlation = TRUE,
+                                 pepC.estim = "mad",
+                                 logged = FALSE)
 ```
 
 Check the documentation to learn more about each parameter.

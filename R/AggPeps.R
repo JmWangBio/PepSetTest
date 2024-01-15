@@ -10,7 +10,7 @@
 #' @param logged Boolean variable indicating whether abundance data have been
 #' log-transformed
 #'
-#' @return \code{AggPeps} returns a matrix of protein abundance values.
+#' @return \code{AggPeps} returns a list containing a matrix of protein abundance values and a vector of number of peptides
 #' @export
 #'
 #' @author Junmin Wang
@@ -44,6 +44,11 @@ AggPeps <- function(dat, pep_mapping_tbl,
     pep_mapping_tbl[pep_mapping_tbl$protein == x, "peptide"]
   })
   names(pep_lst) <- target_prot_ids
+  ## obtain number of peptides for each protein
+  NPeptide_lst <- sapply(pep_lst, function(x) {
+    length(x)
+  })
+  names(NPeptide_lst) <- target_prot_ids
   ## aggregate for each protein
   aggfun <- NA
   if (method == "sum") {
@@ -59,5 +64,9 @@ AggPeps <- function(dat, pep_mapping_tbl,
   }
   if (method != "robreg")
     prot.dat <- log2(prot.dat)
-  return(prot.dat)
+  ## store results to list
+  prot.dat.lst <- list()
+  prot.dat.lst$int <- prot.dat
+  prot.dat.lst$NPeptide <- NPeptide_lst
+  return(prot.dat.lst)
 }
