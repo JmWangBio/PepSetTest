@@ -121,7 +121,7 @@ TTestwCor <- function(statistic,
 
   #	Add adjusted p-value
   if(nsets>1L) tab$adj.P.Val <- stats::p.adjust(tab$PValue,
-                                                method="BY")
+                                                method="BH")
 
   tab
 }

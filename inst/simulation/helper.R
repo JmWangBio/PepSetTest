@@ -1,4 +1,6 @@
 
+## This script has the functions required to run the other scripts in this folder.
+
 ## simulate proteins with correlation (5% active)
 main_sim_active_corr <- function(GroupDiff = 0.5, 
                                  nTestPeps = c(3, 10, 30), 

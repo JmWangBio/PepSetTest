@@ -41,6 +41,7 @@ EstimInterPepCor <- function(dat, contrasts.par, group,
                              pep_mapping_tbl,
                              equal.correlation = FALSE,
                              logged = FALSE) {
+  dat <- dat[stats::complete.cases(dat), ]
   if (logged) {
     dat.m <- as.matrix(dat)
   } else {

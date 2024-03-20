@@ -1,11 +1,11 @@
 
 ## Author: Junmin Wang
-## Date: June 20th, 2023
+## Date: March 17th, 2024
 ## IMPORTANT NOTE: To run this script successfully, you need to have the dplyr, tibble, stringr, and PepSetTest R packages installed.
-## In addition, you need the "peptides.txt" files (MaxQuant search output) from De Marchi et al (2016), Mol. Oncol.
-## These files can be downloaded from ProteomeXchange with dataset identifiers PXD000484 and PXD000485.
-## The former refers to the EMC dataset, and the latter refers to the NKI-AVL + RUMC dataset.
-## After downloading these files, change "path/to/peptides.txt" to where "peptides.txt"is located on your computer.
+## Make sure to change the paths of output to where you want to save them (lines 89, 102, 119, 132).
+## In addition, you need the "peptides.txt" file (MaxQuant search output) from De Marchi et al (2016), Mol. Oncol.
+## This file can be downloaded from ProteomeXchange with dataset identifier PXD000485, which refers to the NKI-AVL + RUMC dataset.
+## After downloading this file, change "path/to/peptides.txt" to where "peptides.txt"is located on your computer (line 29).
 
 ## load libraries
 library(dplyr)
@@ -32,14 +32,14 @@ pep_df <- read.delim("path/to/peptides.txt",  ## change path to where "peptides.
 ## discard contaminants, reverse sequences, and peptides with PEP score < 0.05
 pep_df_filtered <- pep_df %>%
   dplyr::filter(PEP  < 0.05,
-         !grepl("CON_|REV_", .$Leading.razor.protein))
+                !grepl("CON_|REV_", .$Leading.razor.protein))
 
 ## extract peptide sequence + protein ID mapping table
 PepNames <- pep_df_filtered %>%
   dplyr::select("Sequence", "Leading.razor.protein") %>%
   dplyr::distinct() %>%
   `colnames<-`(c("peptide", "protein"))
-  
+
 ## extract protein ID + gene name mapping table
 ProNames <- pep_df_filtered %>%
   dplyr::select("Leading.razor.protein", "Gene.names") %>%
@@ -85,6 +85,9 @@ sumLimma_output <- AggLimmaWorkflow(dat = df.nor.filtered,
 sumLimma_output <- sumLimma_output %>%
   dplyr::inner_join(ProNames, by = "protein")
 
+saveRDS(object = sumLimma_output,
+        file = "path/to/bc_val_sumLimma_res.rds")  ## change path to where you want to save this output
+
 ## aggregation by robust regression
 robRegLimma_output <- AggLimmaWorkflow(dat = df.nor.filtered,
                                        contrasts.par = contrasts.par,
@@ -95,16 +98,35 @@ robRegLimma_output <- AggLimmaWorkflow(dat = df.nor.filtered,
 robRegLimma_output <- robRegLimma_output %>%
   dplyr::inner_join(ProNames, by = "protein")
 
+saveRDS(object = robRegLimma_output,
+        file = "path/to/bc_val_robRegLimma_res.rds")  ## change path to where you want to save this output
+
 ## peptide set test
-pepSetTest_eq_pep_corr_mad_output <- PepSetTestWorkflow(dat = df.nor.filtered,
-                                                      contrasts.par = contrasts.par,
-                                                      group = Group,
-                                                      pep_mapping_tbl = PepNames.filtered,
-                                                      stats = "t", 
-                                                      correlated = TRUE,
-                                                      equal.correlation = TRUE,
-                                                      pepC.estim = "mad",
-                                                      logged = FALSE)
+pepSetTest_eq_pep_corr_mad_output <- CompPepSetTestWorkflow(dat = df.nor.filtered,
+                                                            contrasts.par = contrasts.par,
+                                                            group = Group,
+                                                            pep_mapping_tbl = PepNames.filtered,
+                                                            stats = "t", 
+                                                            correlated = TRUE,
+                                                            equal.correlation = TRUE,
+                                                            pepC.estim = "mad",
+                                                            logged = FALSE)
 
 pepSetTest_eq_pep_corr_mad_output <- pepSetTest_eq_pep_corr_mad_output %>%
   dplyr::inner_join(ProNames, by = "protein")
+
+saveRDS(object = pepSetTest_eq_pep_corr_mad_output, 
+        file = "path/to/bc_val_pepSetTest_res.rds")  ## change path to where you want to save this output
+
+## t-test on peptides
+eBayes.fit <- FitContrasts(dat = df.nor.filtered,
+                           contrasts.par = contrasts.par,
+                           group = Group,
+                           logged = FALSE)
+contrasts.res <- EnframeContrastsRes(eBayes.fit)
+contrasts.res <- contrasts.res %>%
+  inner_join(PepNames.filtered, by = c("feature" = "peptide")) %>%
+  inner_join(ProNames, by = "protein")
+
+saveRDS(object = contrasts.res,
+        file = "path/to/bc_val_pep_dea_res.rds")  ## change path to where you want to save this output
