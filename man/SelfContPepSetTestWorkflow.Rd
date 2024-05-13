@@ -13,17 +13,18 @@ SelfContPepSetTestWorkflow(
 )
 }
 \arguments{
-\item{dat}{a dataframe or matrix of feature (e.g., peptide, protein) abundance}
+\item{dat}{a dataframe or matrix of peptide abundance}
 
 \item{contrasts.par}{group levels to be compared separated by dash (e.g., "B-A"
 if group B is to be compared against group A)}
 
 \item{group}{list of group levels corresponding to each sample. The order of group
-levels needs to match that of samples in the feature abundance table.}
+levels needs to match that of samples in the peptide abundance table.}
 
 \item{pep_mapping_tbl}{a table mapping peptides to proteins. "pep_mapping_tbl" and "dat" should contain the same peptides.}
 
-\item{logged}{Boolean variable indicating whether data have been log-transformed}
+\item{logged}{Boolean variable indicating whether abundance data have been
+log-transformed}
 }
 \value{
 \code{SelfContPepSetTestWorkflow} returns a dataframe containing the following columns

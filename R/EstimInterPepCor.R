@@ -4,8 +4,8 @@
 #' estimate inter-peptide correlation coefficient for each protein via the
 #' mixed model approach or approach described in Wu and Smyth (2012), \emph{Nucleic Acids Research}.
 #'
-#' @inheritParams FitContrasts
 #' @inheritParams AggPeps
+#' @inheritParams FitLmerBySample
 #' @param equal.correlation Boolean variable indicating whether all pairwise
 #' inter-peptide correlation coefficients are assumed to be equal within a protein.
 #' If true, the mixed model approach will be applied; otherwise, the approach
@@ -30,14 +30,15 @@
 #' pep_mapping_tbl <- data.frame(peptide = paste0("Peptide", 1:90),
 #' protein = paste0("Protein", rep(1:30, each = 3)))
 #'
-#' # Generate groups and contrasts
+#' # Generate design matrix
 #' group <- c(rep("A", 3), rep("B", 3))
-#' contrasts.par <- "B-A"
+#' group <- factor(group)
+#' design <- stats::model.matrix(~ 0 + group)
 #'
-#' EstimInterPepCor(dat, contrasts.par, group, pep_mapping_tbl,
+#' EstimInterPepCor(dat, design, pep_mapping_tbl,
 #' equal.correlation = TRUE, logged = FALSE)
 #'
-EstimInterPepCor <- function(dat, contrasts.par, group,
+EstimInterPepCor <- function(dat, design,
                              pep_mapping_tbl,
                              equal.correlation = FALSE,
                              logged = FALSE) {
@@ -57,17 +58,15 @@ EstimInterPepCor <- function(dat, contrasts.par, group,
   })
   names(pep_lst) <- target_prot_ids
   ## calculate correlation
-  group <- factor(group)
-  design.m <- stats::model.matrix(~ 0 + group)
   inter.pep.cor.lst <-
     sapply(target_prot_ids, function(x) {
       if (length(pep_lst[[x]]) >= 2) {
         if (equal.correlation) {
           inter.pep.cor <- FitLmerBySample(dat.m[pep_lst[[x]], ],
-                                           design.m)
+                                           design)
         } else {
           inter.pep.cor <- limma::interGeneCorrelation(dat.m[pep_lst[[x]], ],
-                                                       design.m)$correlation
+                                                       design)$correlation
           inter.pep.cor[inter.pep.cor < 0] <- 0
         }
       } else {

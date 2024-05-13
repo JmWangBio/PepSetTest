@@ -17,13 +17,13 @@ CompPepSetTestWorkflow(
 )
 }
 \arguments{
-\item{dat}{a dataframe or matrix of feature (e.g., peptide, protein) abundance}
+\item{dat}{a dataframe or matrix of peptide abundance}
 
 \item{contrasts.par}{group levels to be compared separated by dash (e.g., "B-A"
 if group B is to be compared against group A)}
 
 \item{group}{list of group levels corresponding to each sample. The order of group
-levels needs to match that of samples in the feature abundance table.}
+levels needs to match that of samples in the peptide abundance table.}
 
 \item{pep_mapping_tbl}{a table mapping peptides to proteins. "pep_mapping_tbl" and "dat" should contain the same peptides.}
 
@@ -44,7 +44,8 @@ belonging to the protein of interest, i.e., test set. Options include "sd" and "
 "sd" represents sample standard deviation. "mad" represents sample median
 absolute deviation.}
 
-\item{logged}{Boolean variable indicating whether data have been log-transformed}
+\item{logged}{Boolean variable indicating whether abundance data have been
+log-transformed}
 }
 \value{
 \code{CompPepSetTestWorkflow} returns a dataframe containing the following columns
@@ -53,7 +54,7 @@ absolute deviation.}
 \item{Correlation}{inter-peptide correlation coefficient}
 \item{Direction}{direction of change}
 \item{PValue}{raw p-value}
-\item{adj.P.Val}{p-value adjusted via the Benjamini-Yekutieli method}
+\item{adj.P.Val}{p-value adjusted via the Benjamini-Hochberg method}
 \item{logFC}{average log2 fold change of peptides}
 \item{Up}{number of upregulated peptides}
 \item{Down}{number of downregulated peptides}

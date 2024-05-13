@@ -21,7 +21,7 @@
 #' \item{Correlation}{inter-peptide correlation coefficient}
 #' \item{Direction}{direction of change}
 #' \item{PValue}{raw p-value}
-#' \item{adj.P.Val}{p-value adjusted via the Benjamini-Yekutieli method}
+#' \item{adj.P.Val}{p-value adjusted via the Benjamini-Hochberg method}
 #' @export
 #'
 #' @author Junmin Wang

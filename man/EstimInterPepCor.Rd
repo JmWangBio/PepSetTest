@@ -6,21 +6,16 @@
 \usage{
 EstimInterPepCor(
   dat,
-  contrasts.par,
-  group,
+  design,
   pep_mapping_tbl,
   equal.correlation = FALSE,
   logged = FALSE
 )
 }
 \arguments{
-\item{dat}{a dataframe or matrix of feature (e.g., peptide, protein) abundance}
+\item{dat}{a dataframe or matrix of peptide abundance}
 
-\item{contrasts.par}{group levels to be compared separated by dash (e.g., "B-A"
-if group B is to be compared against group A)}
-
-\item{group}{list of group levels corresponding to each sample. The order of group
-levels needs to match that of samples in the feature abundance table.}
+\item{design}{design matrix}
 
 \item{pep_mapping_tbl}{a table mapping peptides to proteins. "pep_mapping_tbl" and "dat" should contain the same peptides.}
 
@@ -30,7 +25,8 @@ If true, the mixed model approach will be applied; otherwise, the approach
 described in Wu and Smyth (2012), \emph{Nucleic Acids Research} will be applied.
 In either case, only non-negative mean correlations are allowed.}
 
-\item{logged}{Boolean variable indicating whether data have been log-transformed}
+\item{logged}{Boolean variable indicating whether abundance data have been
+log-transformed}
 }
 \value{
 \code{EstimInterPepCor} returns a numeric vector of inter-peptide
@@ -51,11 +47,12 @@ rownames(dat) <- paste0("Peptide", 1:90)
 pep_mapping_tbl <- data.frame(peptide = paste0("Peptide", 1:90),
 protein = paste0("Protein", rep(1:30, each = 3)))
 
-# Generate groups and contrasts
+# Generate design matrix
 group <- c(rep("A", 3), rep("B", 3))
-contrasts.par <- "B-A"
+group <- factor(group)
+design <- stats::model.matrix(~ 0 + group)
 
-EstimInterPepCor(dat, contrasts.par, group, pep_mapping_tbl,
+EstimInterPepCor(dat, design, pep_mapping_tbl,
 equal.correlation = TRUE, logged = FALSE)
 
 }

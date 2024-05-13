@@ -4,10 +4,8 @@
 #' execute the competitive peptide set test workflow to compute the log2 fold change,
 #' p-value, and adjusted p-value of all proteins identified.
 #'
-#' @inheritParams EstimInterPepCor
+#' @inheritParams AggLimmaWorkflow
 #' @inheritParams CompPepSetTest
-#' @param group list of group levels corresponding to each sample. The order of group
-#' levels needs to match that of samples in the feature abundance table.
 #' @param correlated Boolean variable indicating whether peptides are assumed to be correlated.
 #' If correlated, inter-peptide correlation will be estimated.
 #' @param equal.correlation Boolean variable indicating whether all pairwise
@@ -22,7 +20,7 @@
 #' \item{Correlation}{inter-peptide correlation coefficient}
 #' \item{Direction}{direction of change}
 #' \item{PValue}{raw p-value}
-#' \item{adj.P.Val}{p-value adjusted via the Benjamini-Yekutieli method}
+#' \item{adj.P.Val}{p-value adjusted via the Benjamini-Hochberg method}
 #' \item{logFC}{average log2 fold change of peptides}
 #' \item{Up}{number of upregulated peptides}
 #' \item{Down}{number of downregulated peptides}
@@ -65,9 +63,12 @@ CompPepSetTestWorkflow <- function(dat, contrasts.par, group, pep_mapping_tbl,
   eBayes.fit <- FitContrasts(dat, contrasts.par, group, logged = logged)
   ## convert eBayes.fit to dataframe
   contrasts.res <- EnframeContrastsRes(eBayes.fit = eBayes.fit)
+  ## construct design matrix
+  group <- factor(group)
+  design <- stats::model.matrix(~ 0 + group)
   ## estimate inter-peptide correlation
   if (correlated) {
-    inter.pep.cors <- EstimInterPepCor(dat, contrasts.par, group,
+    inter.pep.cors <- EstimInterPepCor(dat, design,
                                        pep_mapping_tbl = pep_mapping_tbl,
                                        equal.correlation = equal.correlation,
                                        logged = logged)

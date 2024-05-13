@@ -27,7 +27,7 @@ interest, i.e., test set. Columns include
 \item{Correlation}{inter-peptide correlation coefficient}
 \item{Direction}{direction of change}
 \item{PValue}{raw p-value}
-\item{adj.P.Val}{p-value adjusted via the Benjamini-Yekutieli method}
+\item{adj.P.Val}{p-value adjusted via the Benjamini-Hochberg method}
 }
 \description{
 Test whether peptides belonging to the same protein are differentially expressed relative to

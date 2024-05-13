@@ -34,7 +34,7 @@ absolute deviation.}
 \item{Correlation}{inter-peptide correlation coefficient}
 \item{Direction}{direction of change}
 \item{PValue}{raw p-value}
-\item{adj.P.Val}{p-value adjusted via the Benjamini-Yekutieli method}
+\item{adj.P.Val}{p-value adjusted via the Benjamini-Hochberg method}
 \item{logFC}{average log2 fold change of peptides}
 \item{Up}{number of upregulated peptides}
 \item{Down}{number of downregulated peptides}
