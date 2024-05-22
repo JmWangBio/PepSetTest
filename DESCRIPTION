@@ -22,7 +22,9 @@ Imports:
     matrixStats,
     reshape2,
     stats,
-    tibble
+    tibble,
+    SummarizedExperiment,
+    methods
 Suggests:
     statmod, knitr, rmarkdown, tidyr
 biocViews: DifferentialExpression, Regression, Proteomics, MassSpectrometry

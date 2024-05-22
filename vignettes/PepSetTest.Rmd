@@ -15,10 +15,26 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this vignette, I will help you get acquainted with the basics of the PepSetTest R package^[Wang J, Novick S. Peptide set test: a peptide-centric strategy to infer differentially expressed proteins. Bioinformatics. 2024 May 2;40(5):btae270. doi: 10.1093/bioinformatics/btae270.]. Peptide Set Test (PepSetTest) is a peptide-centric strategy to infer differentially expressed proteins in LC-MS/MS proteomics data. This test detects coordinated changes in the expression of peptides originating from the same protein and compares these changes against the rest of the peptidome. 
+## Abstract
+The PepSetTest (i.e., Peptide Set Test) R package provides functions to perform peptide-centric differential expression analysis. It deals with common data formats in Bioconductor such as SummarizedExperiment or even simple matrices.
+  
+## Introduction
+The `PepSetTest` packages provides a peptide-centric strategy to infer differentially expressed proteins. It contains:
 
-Compared to traditional aggregation-based approaches, the peptide set test demonstrates improved statistical power, yet controlling the Type I error rate correctly in most cases. This test can be valuable for discovering novel biomarkers and prioritizing drug targets, especially when the direct application of statistical analysis to protein data fails to provide substantial insights.
+* an implementation of the competitive peptide set test workflow. This test detects coordinated changes in the expression of peptides originating from the same protein and compares these changes against the rest of the peptidome.
+* an implementation of the self-contained peptide set test workflow. This test determines whether peptides belonging to a protein are differentially expressed without reference to other peptides.
+* an implementation of the aggregation-based workflow starting with peptide-level abundance data.
+* scripts used for generating the simulated data and analysing the data from the spike-in experiment and breast cancer study as shown in Wang et al (2024) Bioinformatics 40(5):btae270. These scripts are stored in the "inst" folder.
 
+In LC-MS/MS proteomics, peptide abundance is traditionally collapsed into protein abundance, and statistical analysis is then performed on the aggregated protein abundance to infer differentially expressed proteins. The empirical Bayes approach implemented in `limma` is among the most commonly used techniques for this purpose.
+
+Unlike `limma`, no aggregation is performed in the peptide set test. Our peptide-centric approach fits a linear model to the peptide data followed by detection of coordinated changes in the expression of peptides originating from the same proteins. Compared to `limma`, the peptide set test demonstrates improved statistical power, yet controlling the Type I error rate correctly in most cases. Details of our method can be found in the following paper:
+
+* Wang J, Novick S. Peptide set test: a peptide-centric strategy to infer differentially expressed proteins. Bioinformatics. 2024 May 2;40(5):btae270. doi: 10.1093/bioinformatics/btae270.
+
+Please cite the paper above if you find peptide set tests useful.
+
+## Using PepSetTest
 The peptide set test takes a peptide abundance table and a peptide-protein mapping table as input. Both tables can be easily extracted from the output of protein search softwares, including MaxQuant, ProteomeDiscoverer, Spectronaut, and DIA-NN. Once the computation is completed, the peptide set test returns the fold change, p-value, and adjusted p-value of each protein. Below I will provide a few examples using simulated data.
 
 ## Example 1
@@ -74,6 +90,40 @@ The above workflow assumes that the peptides are correlated and adopts a mixed-m
 The parameters (e.g., “correlated”, “equal.correlation”, “pepC.estim”) can be adjusted to your preference. However, note that without good reason, we should almost always let PepSetTest estimate inter-peptide correlations on its own by setting `correlated = TRUE`. Please check the documentation if you want to learn more about each parameter.
 
 ## Example 2
+The peptide set test can also take a SummarizedExperiment object as input. To see how it works, let's first store the data simulated in Example 1 as a SummarizedExperiment object.
+
+```{r, eval = TRUE}
+library(dplyr)
+library(tibble)
+library(SummarizedExperiment)
+
+colData <- data.frame(sample = LETTERS[1:length(group)], group = group) %>% 
+  column_to_rownames(var = "sample")
+rowData <- pep_mapping_tbl %>% column_to_rownames(var = "peptide")
+dat.nn <- dat
+rownames(dat.nn) <- NULL
+colnames(dat.nn) <- NULL
+dat.se <- SummarizedExperiment(assays = list(int = dat.nn), 
+                               colData = colData, 
+                               rowData = rowData)
+```
+
+Afterwards, let's run the peptide set test workflow as follows:
+
+```{r, eval = TRUE}
+result2 <- CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
+                                  group = "group",
+                                  pep_mapping_tbl = "protein",
+                                  stats = "t",
+                                  correlated = TRUE,
+                                  equal.correlation = TRUE,
+                                  pepC.estim = "mad",
+                                  logged = FALSE)
+```
+
+This should produce the same results as in Example 1.
+
+## Example 3
 
 In observational designs, a linear model accounting for co-variates (e.g., sex, age) may be used to eliminate confounding factors. Next, I will demonstrate how the peptide set test can be combined with a peptide-level linear model to infer differentially expressed proteins.
 

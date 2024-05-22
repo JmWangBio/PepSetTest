@@ -40,9 +40,34 @@
 #' group = group,
 #' pep_mapping_tbl = pep_mapping_tbl,
 #' logged = FALSE)
+#' 
+#' # Store data as a SummarizedExperiment object
+#' library(dplyr)
+#' library(tibble)
+#' library(SummarizedExperiment)
+#' colData <- data.frame(sample = LETTERS[1:length(group)], group = group) %>% 
+#' column_to_rownames(var = "sample")
+#' rowData <- pep_mapping_tbl %>% column_to_rownames(var = "peptide")
+#' dat.nn <- dat
+#' rownames(dat.nn) <- NULL
+#' colnames(dat.nn) <- NULL
+#' dat.se <- SummarizedExperiment(assays = list(int = dat.nn), colData = colData, rowData = rowData)
+#' 
+#' SelfContPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
+#' group = "group",
+#' pep_mapping_tbl = "protein",
+#' logged = FALSE)
 #'
 SelfContPepSetTestWorkflow <- function(dat, contrasts.par, group, pep_mapping_tbl,
                                        logged = FALSE) {
+  ## extract information from dat if a SummarizedExperiment object
+  if (methods::is(dat, "SummarizedExperiment")) {
+    group <- SummarizedExperiment::colData(dat)[[group]]
+    pep_mapping_tbl <- data.frame(peptide = rownames(SummarizedExperiment::rowData(dat)), 
+                                  protein = SummarizedExperiment::rowData(dat)[[pep_mapping_tbl]])
+    dat <- SummarizedExperiment::assay(dat)
+  }
+  ## prepare data
   if (logged) {
     dat.m <- as.matrix(dat)
   } else {

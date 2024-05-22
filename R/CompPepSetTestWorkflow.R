@@ -6,6 +6,12 @@
 #'
 #' @inheritParams AggLimmaWorkflow
 #' @inheritParams CompPepSetTest
+#' @param dat a dataframe or matrix of peptide abundance, or a SummarizedExperiment object where 
+#' grouping and peptide-protein mapping are provided in colData and rowData, respectively.
+#' @param group a vector of group levels corresponding to each sample. Alternatively, it can be the 
+#' column name of the group in colData if dat is a SummarizedExperiment object.
+#' @param pep_mapping_tbl a table mapping peptides to proteins. Alternatively, it can be the
+#' column name of the protein in rowData if dat is a SummarizedExperiment object.
 #' @param correlated Boolean variable indicating whether peptides are assumed to be correlated.
 #' If correlated, inter-peptide correlation will be estimated.
 #' @param equal.correlation Boolean variable indicating whether all pairwise
@@ -53,12 +59,42 @@
 #' pepC.estim = "mad",
 #' logged = FALSE)
 #'
-CompPepSetTestWorkflow <- function(dat, contrasts.par, group, pep_mapping_tbl,
+#' # Store data as a SummarizedExperiment object
+#' library(dplyr)
+#' library(tibble)
+#' library(SummarizedExperiment)
+#' colData <- data.frame(sample = LETTERS[1:length(group)], group = group) %>% 
+#' column_to_rownames(var = "sample")
+#' rowData <- pep_mapping_tbl %>% column_to_rownames(var = "peptide")
+#' dat.nn <- dat
+#' rownames(dat.nn) <- NULL
+#' colnames(dat.nn) <- NULL
+#' dat.se <- SummarizedExperiment(assays = list(int = dat.nn), colData = colData, rowData = rowData)
+#'
+#' CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
+#' group = "group",
+#' pep_mapping_tbl = "protein",
+#' stats = "t",
+#' correlated = TRUE,
+#' equal.correlation = TRUE,
+#' pepC.estim = "mad",
+#' logged = FALSE)
+#'
+CompPepSetTestWorkflow <- function(dat, contrasts.par, 
+                                   group, 
+                                   pep_mapping_tbl,
                                    stats = c("t", "logFC"),
                                    correlated = FALSE,
                                    equal.correlation = FALSE,
                                    pepC.estim = c("sd", "mad"),
                                    logged = FALSE) {
+  ## extract information from dat if a SummarizedExperiment object
+  if (methods::is(dat, "SummarizedExperiment")) {
+    group <- SummarizedExperiment::colData(dat)[[group]]
+    pep_mapping_tbl <- data.frame(peptide = rownames(SummarizedExperiment::rowData(dat)), 
+                                  protein = SummarizedExperiment::rowData(dat)[[pep_mapping_tbl]])
+    dat <- SummarizedExperiment::assay(dat)
+  }
   ## fit statistical model
   eBayes.fit <- FitContrasts(dat, contrasts.par, group, logged = logged)
   ## convert eBayes.fit to dataframe

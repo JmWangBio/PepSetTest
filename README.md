@@ -181,7 +181,7 @@ pep_mapping_tbl <- data.frame(peptide = paste0("Peptide", 1:500),
                               protein = paste0("Protein", rep(1:100, each = 5)))
 ```
 
-Then let’s fit the peptide-level linear model to the data.
+All data have been simulated. To analyze the data, let’s fit the peptide-level linear model to the data.
 
 ``` r
 # Fit linear model for every peptide
@@ -202,29 +202,15 @@ contrasts_res <- as.data.frame(
   mutate(adj.P.Val = p.adjust(P.Value, method = "BY"))
 ```
 
-Finally, let’s run the peptide set test using the t-statistics obtained
-from the peptide-level linear model.
-
-``` r
-# Run the peptide set test
-result <- CompPepSetTest(contrasts_res,
-                         pep_mapping_tbl = pep_mapping_tbl,
-                         stats = "t",
-                         cor_coef = 0,
-                         pepC.estim = "mad")
-```
-
-The peptide-level data were simulated assuming no inter-peptide
-correlation. If peptides are instead assumed to be inter-correlated,
-then the correlation coefficients need to be estimated prior to running
-the peptide set test using the code as follows:
+The inter-peptide correlation coefficients should be estimated prior to running
+the peptide set test. Afterwards, the peptide set test can be run:
 
 ``` r
 # Estimate inter-peptide correlation coefficients
 group <- factor(group)
 sex <- factor(sex)
 design.m <- stats::model.matrix(~ 0 + group + sex)
-pep_cors <- EstimInterPepCor(dat, contrasts.par, 
+pep_cors <- EstimInterPepCor(dat,
                              design.m,
                              pep_mapping_tbl, 
                              equal.correlation = TRUE,
