@@ -43,7 +43,7 @@ pepwise.vars <- rep(1, sum(nTotalPeps))
 
 ## simulate data
 AllDat <- do.call('rbind', 
-                  lapply(1:length(nTotalPeps), function(i) {
+                  lapply(seq_along(nTotalPeps), function(i) {
                     do.call('rbind', lapply(1:floor(nTotalPeps[i] / nTestPeps[i]), function(j) {
                       t(MASS::mvrnorm(n = nSamples * 2, 
                                       mu = pepwise.means[(nTestPeps[i] * (j-1) + 1):(nTestPeps[i] * j)], 

@@ -36,7 +36,7 @@ nSamples_lst <- c(3, 15, 50)
 interPepCor <- 0
 pval.all.df <- data.frame()
 
-for (n in 1:length(nSamples_lst)) {
+for (n in seq_along(nSamples_lst)) {
   print(sprintf("nSamples: %s; interPepCor: %s", 
                 nSamples_lst[n],
                 interPepCor))
@@ -69,8 +69,8 @@ nTestPeps_lst <- c(3, 10, 30)
 interPepCor <- 0
 pval.all.df <- data.frame()
 
-for (n in 1:length(nSamples_lst)) {
-  for (m in 1:length(nTestPeps_lst)) {
+for (n in seq_along(nSamples_lst)) {
+  for (m in seq_along(nTestPeps_lst)) {
     print(sprintf("nSamples: %s; nTestPeps: %s; interPepCor: %s", 
                   nSamples_lst[n],
                   nTestPeps_lst[m],
@@ -104,7 +104,7 @@ nSamples_lst <- c(3, 15, 50)
 interPepCor <- 0
 pval.all.df <- data.frame()
 
-for (n in 1:length(nSamples_lst)) {
+for (n in seq_along(nSamples_lst)) {
   print(sprintf("nSamples: %s; interPepCor: %s", 
                 nSamples_lst[n],
                 interPepCor))
@@ -135,8 +135,8 @@ nTestPeps_lst <- c(3, 10, 30)
 interPepCor <- 0
 pval.all.df <- data.frame()
 
-for (n in 1:length(nSamples_lst)) {
-  for (m in 1:length(nTestPeps_lst)) {
+for (n in seq_along(nSamples_lst)) {
+  for (m in seq_along(nTestPeps_lst)) {
     print(sprintf("nSamples: %s; nTestPeps: %s; interPepCor: %s", 
                   nSamples_lst[n],
                   nTestPeps_lst[m],

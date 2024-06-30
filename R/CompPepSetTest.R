@@ -6,7 +6,7 @@
 #' @inheritParams TTestwCor
 #' @inheritParams AggPeps
 #' @param result output from \code{EnframeContrastsRes}
-#' @param stats statistics to be used in the peptide set test.
+#' @param stat statistics to be used in the peptide set test.
 #' Options include "t" (t-statistic) and "logFC" (log2 fold change).
 #' @param cor_coef inter-peptide correlation coefficient(s)
 #'
@@ -40,19 +40,19 @@
 #'
 #' fit.cont <- FitContrasts(dat, contrasts.par, group)
 #' cont.res <- EnframeContrastsRes(fit.cont)
-#' CompPepSetTest(cont.res, pep_mapping_tbl, stats = "t",
+#' CompPepSetTest(cont.res, pep_mapping_tbl, stat = "t",
 #' cor_coef = 0, pepC.estim = "sd")
 #'
 CompPepSetTest <- function(result, pep_mapping_tbl,
-                           stats = c("t", "logFC"),
+                           stat = c("t", "logFC"),
                            cor_coef = 0,
                            pepC.estim = c("sd", "mad")) {
-  result <- result %>%
+  result <- result |>
     ## remove NA values
-    dplyr::filter(!is.na(get(stats))) %>%
+    dplyr::filter(!is.na(stat)) |>
     ## merge with peptide mapping table
     dplyr::inner_join(pep_mapping_tbl,
-                      by = c("feature" = "peptide")) %>%
+                      by = c("feature" = "peptide")) |>
     dplyr::rename("peptide" = "feature")
   ## extract all proteins
   target_prot_ids <- unique(as.character(result$protein))
@@ -62,14 +62,14 @@ CompPepSetTest <- function(result, pep_mapping_tbl,
   })
   names(pep_indices_lst) <- target_prot_ids
   ## calculate average peptide log2 fold change
-  logFC_lst <- sapply(pep_indices_lst, function(myIndex)
-    mean(result$logFC[myIndex]))
+  logFC_lst <- unlist(lapply(pep_indices_lst, function(myIndex)
+    mean(result$logFC[myIndex])))
   ## get number of upregulated peptides
-  numUp_lst <- sapply(pep_indices_lst, function(myIndex)
-    sum(result$logFC[myIndex] > 0))
+  numUp_lst <- unlist(lapply(pep_indices_lst, function(myIndex)
+    sum(result$logFC[myIndex] > 0)))
   ## get number of downregulated peptides
-  numDown_lst <- sapply(pep_indices_lst, function(myIndex)
-    sum(result$logFC[myIndex] < 0))
+  numDown_lst <- unlist(lapply(pep_indices_lst, function(myIndex)
+    sum(result$logFC[myIndex] < 0)))
   ## combine protein, average log2fc, and number of up/downregulated into a dataframe
   reg_tbl <- data.frame(protein = target_prot_ids,
                         logFC = logFC_lst,
@@ -90,8 +90,8 @@ CompPepSetTest <- function(result, pep_mapping_tbl,
                            pepC.estim = pepC.estim)
 
   ## merge with reg_tbl
-  test_output <- test_output %>%
-    tibble::rownames_to_column(var = "protein") %>%
+  test_output <- test_output |>
+    tibble::rownames_to_column(var = "protein") |>
     dplyr::inner_join(reg_tbl, by = "protein")
   return(test_output)
 }

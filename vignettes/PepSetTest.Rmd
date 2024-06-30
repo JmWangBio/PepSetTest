@@ -1,7 +1,8 @@
 ---
 title: "A Tutorial for PepSetTest"
 author: "Junmin Wang"
-output: rmarkdown::html_vignette
+output: BiocStyle::html_document
+bibliography: '`r system.file("REFERENCES.bib", package="PepSetTest")`'
 vignette: >
   %\VignetteIndexEntry{A Tutorial for PepSetTest}
   %\VignetteEngine{knitr::rmarkdown}
@@ -16,23 +17,20 @@ knitr::opts_chunk$set(
 ```
 
 ## Abstract
-The PepSetTest (i.e., Peptide Set Test) R package provides functions to perform peptide-centric differential expression analysis. It deals with common data formats in Bioconductor such as SummarizedExperiment or even simple matrices.
-  
-## Introduction
+The PepSetTest (i.e., Peptide Set Test) R package provides functions to perform peptide-centric differential expression analysis. It deals with common data formats in Bioconductor such as SummarizedExperiment or even simple matrices. Please cite @PepSetTest if you find peptide set tests useful.
+
+## Package Content
 The `PepSetTest` packages provides a peptide-centric strategy to infer differentially expressed proteins. It contains:
 
 * an implementation of the competitive peptide set test workflow. This test detects coordinated changes in the expression of peptides originating from the same protein and compares these changes against the rest of the peptidome.
 * an implementation of the self-contained peptide set test workflow. This test determines whether peptides belonging to a protein are differentially expressed without reference to other peptides.
 * an implementation of the aggregation-based workflow starting with peptide-level abundance data.
-* scripts used for generating the simulated data and analysing the data from the spike-in experiment and breast cancer study as shown in Wang et al (2024) Bioinformatics 40(5):btae270. These scripts are stored in the "inst" folder.
+* scripts used for generating the simulated data and analysing the data from the spike-in experiment and breast cancer study as shown in @PepSetTest. These scripts are stored in the "inst" folder.
 
+## Introduction
 In LC-MS/MS proteomics, peptide abundance is traditionally collapsed into protein abundance, and statistical analysis is then performed on the aggregated protein abundance to infer differentially expressed proteins. The empirical Bayes approach implemented in `limma` is among the most commonly used techniques for this purpose.
 
-Unlike `limma`, no aggregation is performed in the peptide set test. Our peptide-centric approach fits a linear model to the peptide data followed by detection of coordinated changes in the expression of peptides originating from the same proteins. Compared to `limma`, the peptide set test demonstrates improved statistical power, yet controlling the Type I error rate correctly in most cases. Details of our method can be found in the following paper:
-
-* Wang J, Novick S. Peptide set test: a peptide-centric strategy to infer differentially expressed proteins. Bioinformatics. 2024 May 2;40(5):btae270. doi: 10.1093/bioinformatics/btae270.
-
-Please cite the paper above if you find peptide set tests useful.
+Unlike `limma`, no aggregation is performed in the peptide set test. Our peptide-centric approach fits a linear model to the peptide data followed by detection of coordinated changes in the expression of peptides originating from the same proteins. Compared to `limma`, the peptide set test demonstrates improved statistical power, yet controlling the Type I error rate correctly in most cases. Details of our method can be found in @PepSetTest.
 
 ## Using PepSetTest
 The peptide set test takes a peptide abundance table and a peptide-protein mapping table as input. Both tables can be easily extracted from the output of protein search softwares, including MaxQuant, ProteomeDiscoverer, Spectronaut, and DIA-NN. Once the computation is completed, the peptide set test returns the fold change, p-value, and adjusted p-value of each protein. Below I will provide a few examples using simulated data.
@@ -78,7 +76,7 @@ Now that all the data are ready, we can run the peptide set test workflow as fol
 result <- CompPepSetTestWorkflow(dat, contrasts.par = contrasts.par,
                                  group = group,
                                  pep_mapping_tbl = pep_mapping_tbl,
-                                 stats = "t",
+                                 stat = "t",
                                  correlated = TRUE,
                                  equal.correlation = TRUE,
                                  pepC.estim = "mad",
@@ -97,7 +95,7 @@ library(dplyr)
 library(tibble)
 library(SummarizedExperiment)
 
-colData <- data.frame(sample = LETTERS[1:length(group)], group = group) %>% 
+colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) %>% 
   column_to_rownames(var = "sample")
 rowData <- pep_mapping_tbl %>% column_to_rownames(var = "peptide")
 dat.nn <- dat
@@ -114,7 +112,7 @@ Afterwards, let's run the peptide set test workflow as follows:
 result2 <- CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
                                   group = "group",
                                   pep_mapping_tbl = "protein",
-                                  stats = "t",
+                                  stat = "t",
                                   correlated = TRUE,
                                   equal.correlation = TRUE,
                                   pepC.estim = "mad",
@@ -123,99 +121,4 @@ result2 <- CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
 
 This should produce the same results as in Example 1.
 
-## Example 3
-
-In observational designs, a linear model accounting for co-variates (e.g., sex, age) may be used to eliminate confounding factors. Next, I will demonstrate how the peptide set test can be combined with a peptide-level linear model to infer differentially expressed proteins.
-
-First, let’s simulate some peptide abundance data. Suppose that in a hypothetical proteomics study of cancer, 500 peptides in total are detected. The diseased group (i.e., D) and healthy group (i.e., H) have six samples each: three samples collected from donors of either sex. Thirty peptides are more abundant in the diseased group than in the healthy group by an order of 2 on the log2 scale. The same thirty peptides are also more abundant in the male group than in the female group by an order of 1 on the log2 scale.
-
-```{r, eval = TRUE}
-# Load library
-library(PepSetTest)
-library(dplyr)
-library(tidyr)
-library(tibble)
-
-# Generate random peptide data
-dat <- matrix(rnorm(6000), ncol = 12)
-dat[1:30, 7:12] <- dat[1:30, 7:12] + 2
-dat[1:30, c(1:3, 7:9)] <- dat[1:30, c(1:3, 7:9)] + 1
-dat <- 2^dat
-colnames(dat) <- paste0("Sample", 1:12)
-rownames(dat) <- paste0("Peptide", 1:500)
-
-# Convert data from wide format to long format
-dat.long <- dat %>%
-  as.data.frame(.) %>%
-  rownames_to_column(var = "peptide") %>%
-  pivot_longer(!peptide, names_to = "sample",
-               values_to = "abundance")
-```
-
-Next, let’s generate the group labels and contrasts.
-
-```{r, eval = TRUE}
-# Generate group labels and contrasts
-group <- c(rep("H", 6), rep("D", 6))
-sex <- rep(rep(c("M", "F"), each = 3), 2)
-contrasts.par <- "D-H"
-sample_metadata_mapping <- data.frame(sample = paste0("Sample", 1:12),
-                                      group = group, 
-                                      sex = sex)
-dat.long <- dat.long %>%
-  inner_join(sample_metadata_mapping, by = "sample")
-```
-
-Afterwards, let’s simulate a peptide-protein mapping table.
-
-```{r, eval = TRUE}
-# Generate a mapping table
-pep_mapping_tbl <- data.frame(peptide = paste0("Peptide", 1:500),
-                              protein = paste0("Protein", rep(1:100, each = 5)))
-```
-
-All data have been simulated. To analyze the data, let’s fit the peptide-level linear model first.
-
-```{r, eval = TRUE}
-# Fit linear model for every peptide
-contrasts_res <- as.data.frame(
-  t(sapply(unique(pep_mapping_tbl$peptide), 
-           function(x) {
-             fit <- lm(abundance ~ group + sex,
-                       data = dat.long %>% filter(peptide == x))
-             logfc <- -as.numeric(coef(summary(fit))[, "Estimate"]["groupH"])
-             t_stat <- -as.numeric(coef(summary(fit))[, "t value"]["groupH"])
-             p_val <- as.numeric(coef(summary(fit))[, "Pr(>|t|)"]["groupH"])
-             return(c(x, logfc, t_stat, p_val))
-           }))
-) %>% 
-  remove_rownames() %>%
-  `colnames<-`(c("feature", "logFC", "t", "P.Value")) %>%
-  mutate_at(c("logFC", "t", "P.Value"), as.numeric) %>%
-  mutate(adj.P.Val = p.adjust(P.Value, method = "BH"))
-```
-
-The inter-peptide correlation coefficients can be estimated as follows:
-
-```{r, eval = TRUE}
-# Estimate inter-peptide correlation coefficients
-group <- factor(group)
-sex <- factor(sex)
-design.m <- stats::model.matrix(~ 0 + group + sex)
-pep_cors <- EstimInterPepCor(dat,
-                             design.m,
-                             pep_mapping_tbl, 
-                             equal.correlation = TRUE,
-                             logged = FALSE)
-```
-
-Finally, let’s run the peptide set test using the t-statistics obtained from the peptide-level linear model and the inter-peptide correlation coefficients calculated above.
-
-```{r, eval = TRUE}
-# Run the peptide set test
-result <- CompPepSetTest(contrasts_res,
-                         pep_mapping_tbl = pep_mapping_tbl,
-                         stats = "t",
-                         cor_coef = pep_cors,
-                         pepC.estim = "mad")
-```
+## References

@@ -91,7 +91,7 @@ workflow as follows:
 result <- CompPepSetTestWorkflow(dat, contrasts.par = contrasts.par,
                                  group = group,
                                  pep_mapping_tbl = pep_mapping_tbl,
-                                 stats = "t",
+                                 stat = "t",
                                  correlated = FALSE,
                                  equal.correlation = FALSE,
                                  pepC.estim = "mad",
@@ -114,7 +114,7 @@ the workflow as follows:
 result <- CompPepSetTestWorkflow(dat, contrasts.par = contrasts.par,
                                  group = group,
                                  pep_mapping_tbl = pep_mapping_tbl,
-                                 stats = "t",
+                                 stat = "t",
                                  correlated = TRUE,
                                  equal.correlation = TRUE,
                                  pepC.estim = "mad",
@@ -219,7 +219,7 @@ pep_cors <- EstimInterPepCor(dat,
 # Run the peptide set test
 result <- CompPepSetTest(contrasts_res,
                          pep_mapping_tbl = pep_mapping_tbl,
-                         stats = "t",
+                         stat = "t",
                          cor_coef = pep_cors,
                          pepC.estim = "mad")
 ```

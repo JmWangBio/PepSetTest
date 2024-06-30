@@ -16,15 +16,17 @@ AggLimmaWorkflow(
 )
 }
 \arguments{
-\item{dat}{a dataframe or matrix of peptide abundance}
+\item{dat}{a dataframe or matrix of peptide abundance, or a SummarizedExperiment object where
+grouping and peptide-protein mapping are provided in colData and rowData, respectively.}
 
 \item{contrasts.par}{group levels to be compared separated by dash (e.g., "B-A"
 if group B is to be compared against group A)}
 
-\item{group}{list of group levels corresponding to each sample. The order of group
-levels needs to match that of samples in the peptide abundance table.}
+\item{group}{a vector of group levels corresponding to each sample. Alternatively, it can be the
+column name of the group in colData if dat is a SummarizedExperiment object.}
 
-\item{pep_mapping_tbl}{a table mapping peptides to proteins. "pep_mapping_tbl" and "dat" should contain the same peptides.}
+\item{pep_mapping_tbl}{a table mapping peptides to proteins. Alternatively, it can be the
+column name of the protein in rowData if dat is a SummarizedExperiment object.}
 
 \item{method}{method of aggregation. Options including "sum" (summed peptide intensity)
 and "robreg" (robust regression with M-Estimation).}
@@ -68,6 +70,23 @@ contrasts.par <- "B-A"
 AggLimmaWorkflow(dat, contrasts.par = contrasts.par,
 group = group,
 pep_mapping_tbl = pep_mapping_tbl,
+method = "sum",
+logged = FALSE)
+
+# Store data as a SummarizedExperiment object
+library(tibble)
+library(SummarizedExperiment)
+colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) |> 
+column_to_rownames(var = "sample")
+rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
+dat.nn <- dat
+rownames(dat.nn) <- NULL
+colnames(dat.nn) <- NULL
+dat.se <- SummarizedExperiment(assays = list(int = dat.nn), colData = colData, rowData = rowData)
+
+AggLimmaWorkflow(dat.se, contrasts.par = contrasts.par,
+group = "group",
+pep_mapping_tbl = "protein",
 method = "sum",
 logged = FALSE)
 

@@ -31,8 +31,8 @@
 #'
 EnframeContrastsRes <- function(eBayes.fit, eb = TRUE) {
   if (eb) {
-    result <- limma::topTable(eBayes.fit, number = Inf) %>%
-      tibble::rownames_to_column("feature") %>%
+    result <- limma::topTable(eBayes.fit, number = Inf) |>
+      tibble::rownames_to_column("feature") |>
       ## remove rows containing NAs
       dplyr::filter(!is.na(t))
   } else {

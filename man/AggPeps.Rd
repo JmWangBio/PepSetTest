@@ -12,9 +12,11 @@ AggPeps(
 )
 }
 \arguments{
-\item{dat}{a dataframe or matrix of peptide abundance}
+\item{dat}{a dataframe or matrix of peptide abundance, or a SummarizedExperiment object where
+grouping and peptide-protein mapping are provided in colData and rowData, respectively.}
 
-\item{pep_mapping_tbl}{a table mapping peptides to proteins. "pep_mapping_tbl" and "dat" should contain the same peptides.}
+\item{pep_mapping_tbl}{a table mapping peptides to proteins. Alternatively, it can be the
+column name of the protein in rowData if dat is a SummarizedExperiment object.}
 
 \item{method}{method of aggregation. Options including "sum" (summed peptide intensity)
 and "robreg" (robust regression with M-Estimation).}
@@ -40,6 +42,18 @@ pep_mapping_tbl <- data.frame(peptide = paste0("Peptide", 1:500),
 protein = paste0("Protein", rep(1:100, each = 5)))
 
 AggPeps(dat, pep_mapping_tbl, method = "sum",
+logged = FALSE)
+
+# Store data as a SummarizedExperiment object
+library(tibble)
+library(SummarizedExperiment)
+rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
+dat.nn <- dat
+rownames(dat.nn) <- NULL
+colnames(dat.nn) <- NULL
+dat.se <- SummarizedExperiment(assays = list(int = dat.nn), rowData = rowData)
+
+AggPeps(dat.se, pep_mapping_tbl = "protein", method = "sum",
 logged = FALSE)
 
 }

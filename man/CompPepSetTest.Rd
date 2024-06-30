@@ -7,7 +7,7 @@
 CompPepSetTest(
   result,
   pep_mapping_tbl,
-  stats = c("t", "logFC"),
+  stat = c("t", "logFC"),
   cor_coef = 0,
   pepC.estim = c("sd", "mad")
 )
@@ -15,9 +15,10 @@ CompPepSetTest(
 \arguments{
 \item{result}{output from \code{EnframeContrastsRes}}
 
-\item{pep_mapping_tbl}{a table mapping peptides to proteins. "pep_mapping_tbl" and "dat" should contain the same peptides.}
+\item{pep_mapping_tbl}{a table mapping peptides to proteins. Alternatively, it can be the
+column name of the protein in rowData if dat is a SummarizedExperiment object.}
 
-\item{stats}{statistics to be used in the peptide set test.
+\item{stat}{statistics to be used in the peptide set test.
 Options include "t" (t-statistic) and "logFC" (log2 fold change).}
 
 \item{cor_coef}{inter-peptide correlation coefficient(s)}
@@ -59,7 +60,7 @@ contrasts.par <- "B-A"
 
 fit.cont <- FitContrasts(dat, contrasts.par, group)
 cont.res <- EnframeContrastsRes(fit.cont)
-CompPepSetTest(cont.res, pep_mapping_tbl, stats = "t",
+CompPepSetTest(cont.res, pep_mapping_tbl, stat = "t",
 cor_coef = 0, pepC.estim = "sd")
 
 }

@@ -7,7 +7,8 @@
 RobustReg(dat, logged = FALSE)
 }
 \arguments{
-\item{dat}{a dataframe or matrix of peptide abundance}
+\item{dat}{a dataframe or matrix of peptide abundance, or a SummarizedExperiment object where
+grouping and peptide-protein mapping are provided in colData and rowData, respectively.}
 
 \item{logged}{Boolean variable indicating whether abundance data have been
 log-transformed}

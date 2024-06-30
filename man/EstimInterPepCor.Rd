@@ -13,11 +13,13 @@ EstimInterPepCor(
 )
 }
 \arguments{
-\item{dat}{a dataframe or matrix of peptide abundance}
+\item{dat}{a dataframe or matrix of peptide abundance, or a SummarizedExperiment object where
+grouping and peptide-protein mapping are provided in colData and rowData, respectively.}
 
 \item{design}{design matrix}
 
-\item{pep_mapping_tbl}{a table mapping peptides to proteins. "pep_mapping_tbl" and "dat" should contain the same peptides.}
+\item{pep_mapping_tbl}{a table mapping peptides to proteins. Alternatively, it can be the
+column name of the protein in rowData if dat is a SummarizedExperiment object.}
 
 \item{equal.correlation}{Boolean variable indicating whether all pairwise
 inter-peptide correlation coefficients are assumed to be equal within a protein.

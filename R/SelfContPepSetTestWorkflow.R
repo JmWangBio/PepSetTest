@@ -42,12 +42,11 @@
 #' logged = FALSE)
 #' 
 #' # Store data as a SummarizedExperiment object
-#' library(dplyr)
 #' library(tibble)
 #' library(SummarizedExperiment)
-#' colData <- data.frame(sample = LETTERS[1:length(group)], group = group) %>% 
+#' colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) |>
 #' column_to_rownames(var = "sample")
-#' rowData <- pep_mapping_tbl %>% column_to_rownames(var = "peptide")
+#' rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
 #' dat.nn <- dat
 #' rownames(dat.nn) <- NULL
 #' colnames(dat.nn) <- NULL
@@ -82,11 +81,11 @@ SelfContPepSetTestWorkflow <- function(dat, contrasts.par, group, pep_mapping_tb
   ## run limma analysis
   eBayes.fit <- limma::eBayes(limma::contrasts.fit(fit, contrs))
   ## convert eBayes.fit to dataframe
-  contrasts.res <- EnframeContrastsRes(eBayes.fit = eBayes.fit) %>%
+  contrasts.res <- EnframeContrastsRes(eBayes.fit = eBayes.fit) |>
     dplyr::rename("peptide" = "feature")
   ## retrieve peptide indices
-  result <- data.frame(peptide = rownames(dat)) %>%
-    dplyr::inner_join(contrasts.res, by = "peptide") %>%
+  result <- data.frame(peptide = rownames(dat)) |>
+    dplyr::inner_join(contrasts.res, by = "peptide") |>
     dplyr::inner_join(pep_mapping_tbl,
                       by = "peptide")
   ## extract all proteins
@@ -99,27 +98,27 @@ SelfContPepSetTestWorkflow <- function(dat, contrasts.par, group, pep_mapping_tb
   test_output <- limma::fry(dat.m,
                             pep_indices_lst,
                             design = design.m,
-                            contrast = contrs) %>%
+                            contrast = contrs) |>
     tibble::rownames_to_column(var = "prot_index")
   test_output$prot_index <- as.numeric(sub("set", "", test_output$prot_index))
   test_output$protein <- target_prot_ids[test_output$prot_index]
   test_output <- test_output[order(test_output$prot_index, decreasing = FALSE), ]
   rownames(test_output) <- NULL
   ## calculate average peptide log2 fold change
-  logFC_lst <- sapply(pep_indices_lst, function(myIndex)
-    mean(result$logFC[myIndex]))
+  logFC_lst <- unlist(lapply(pep_indices_lst, function(myIndex)
+    mean(result$logFC[myIndex])))
   ## get number of upregulated peptides
-  numUp_lst <- sapply(pep_indices_lst, function(myIndex)
-    sum(result$logFC[myIndex] > 0))
+  numUp_lst <- unlist(lapply(pep_indices_lst, function(myIndex)
+    sum(result$logFC[myIndex] > 0)))
   ## get number of downregulated peptides
-  numDown_lst <- sapply(pep_indices_lst, function(myIndex)
-    sum(result$logFC[myIndex] < 0)) 
-  test_output <- test_output %>%
+  numDown_lst <- unlist(lapply(pep_indices_lst, function(myIndex)
+    sum(result$logFC[myIndex] < 0)))
+  test_output <- test_output |>
     dplyr::mutate(logFC = logFC_lst,
                   Up = numUp_lst,
-                  Down = numDown_lst) %>%
+                  Down = numDown_lst) |>
     dplyr::select("protein", "NGenes", "Direction", "PValue", "FDR",
-                  "logFC", "Up", "Down") %>%
+                  "logFC", "Up", "Down") |>
     dplyr::rename("NPeps" = "NGenes",
                   "adj.P.Val" = "FDR")
   return(test_output)

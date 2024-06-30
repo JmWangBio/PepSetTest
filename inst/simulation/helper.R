@@ -35,7 +35,7 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
   
   ## simulate data
   AllDat <- do.call('rbind', 
-                    lapply(1:length(nTotalPeps), function(i) {
+                    lapply(seq_along(nTotalPeps), function(i) {
                       do.call('rbind', lapply(1:floor(nTotalPeps[i] / nTestPeps[i]), function(j) {
                         t(MASS::mvrnorm(n = nSamples * 2, 
                                         mu = pepwise.means[(nTestPeps[i] * (j-1) + 1):(nTestPeps[i] * j)], 
@@ -51,7 +51,7 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
   all_DE_pep_index <- c()
   up_DE_prot_index <- c()
   down_DE_prot_index <- c()
-  for (i in 1:length(nDEGs_2)) {
+  for (i in seq_along(nDEGs_2)) {
     up_pep_index <- (1:(nDEGs_2[i] * nTestPeps[i])) + cumsum(c(0, nTotalPeps))[i]
     down_pep_index <- ((nDEGs_2[i] * nTestPeps[i] + 1):(2 * nDEGs_2[i] * nTestPeps[i])) + cumsum(c(0, nTotalPeps))[i]
     up_prot_index <- (1:nDEGs_2[i]) + cumsum(c(0, nTotalPeps / nTestPeps))[i]
@@ -91,7 +91,7 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
                                                           contrasts.par = contrasts.par,
                                                           group = group,
                                                           pep_mapping_tbl = pep_mapping_tbl,
-                                                          stats = "t", 
+                                                          stat = "t", 
                                                           correlated = TRUE,
                                                           equal.correlation = TRUE,
                                                           pepC.estim = "mad",
@@ -101,7 +101,7 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
                                                          contrasts.par = contrasts.par,
                                                          group = group,
                                                          pep_mapping_tbl = pep_mapping_tbl,
-                                                         stats = "t", 
+                                                         stat = "t", 
                                                          correlated = TRUE,
                                                          equal.correlation = TRUE,
                                                          pepC.estim = "sd",
@@ -111,7 +111,7 @@ main_sim_active_corr <- function(GroupDiff = 0.5,
                                                         contrasts.par = contrasts.par,
                                                         group = group,
                                                         pep_mapping_tbl = pep_mapping_tbl,
-                                                        stats = "t", 
+                                                        stat = "t", 
                                                         correlated = TRUE,
                                                         equal.correlation = FALSE,
                                                         pepC.estim = "sd",
@@ -190,7 +190,7 @@ main_sim_active_uncorr <- function(GroupDiff = 0.5,
   
   ## simulate data
   AllDat <- do.call('rbind', 
-                    lapply(1:length(nTotalPeps), function(i) {
+                    lapply(seq_along(nTotalPeps), function(i) {
                       do.call('rbind', lapply(1:floor(nTotalPeps[i] / nTestPeps[i]), function(j) {
                         t(MASS::mvrnorm(n = nSamples * 2, 
                                         mu = pepwise.means[(nTestPeps[i] * (j-1) + 1):(nTestPeps[i] * j)], 
@@ -206,7 +206,7 @@ main_sim_active_uncorr <- function(GroupDiff = 0.5,
   all_DE_pep_index <- c()
   up_DE_prot_index <- c()
   down_DE_prot_index <- c()
-  for (i in 1:length(nDEGs_2)) {
+  for (i in seq_along(nDEGs_2)) {
     up_pep_index <- (1:(nDEGs_2[i] * nTestPeps[i])) + cumsum(c(0, nTotalPeps))[i]
     down_pep_index <- ((nDEGs_2[i] * nTestPeps[i] + 1):(2 * nDEGs_2[i] * nTestPeps[i])) + cumsum(c(0, nTotalPeps))[i]
     up_prot_index <- (1:nDEGs_2[i]) + cumsum(c(0, nTotalPeps / nTestPeps))[i]
@@ -246,7 +246,7 @@ main_sim_active_uncorr <- function(GroupDiff = 0.5,
                                                   contrasts.par = contrasts.par,
                                                   group = group,
                                                   pep_mapping_tbl = pep_mapping_tbl,
-                                                  stats = "t", 
+                                                  stat = "t", 
                                                   correlated = FALSE,
                                                   equal.correlation = FALSE,
                                                   pepC.estim = "mad",
@@ -256,7 +256,7 @@ main_sim_active_uncorr <- function(GroupDiff = 0.5,
                                                  contrasts.par = contrasts.par,
                                                  group = group,
                                                  pep_mapping_tbl = pep_mapping_tbl,
-                                                 stats = "t", 
+                                                 stat = "t", 
                                                  correlated = FALSE,
                                                  equal.correlation = FALSE,
                                                  pepC.estim = "sd",
@@ -329,7 +329,7 @@ main_sim_inactive_corr <- function(nTestPeps = c(3, 10, 30),
   
   ## simulate data
   AllDat <- do.call('rbind', 
-                    lapply(1:length(nTotalPeps), function(i) {
+                    lapply(seq_along(nTotalPeps), function(i) {
                       do.call('rbind', lapply(1:floor(nTotalPeps[i] / nTestPeps[i]), function(j) {
                         t(MASS::mvrnorm(n = nSamples * 2, 
                                         mu = pepwise.means[(nTestPeps[i] * (j-1) + 1):(nTestPeps[i] * j)], 
@@ -365,7 +365,7 @@ main_sim_inactive_corr <- function(nTestPeps = c(3, 10, 30),
                                                          contrasts.par = contrasts.par,
                                                          group = group,
                                                          pep_mapping_tbl = pep_mapping_tbl,
-                                                         stats = "t", 
+                                                         stat = "t", 
                                                          correlated = TRUE,
                                                          equal.correlation = TRUE,
                                                          pepC.estim = "sd",
@@ -375,7 +375,7 @@ main_sim_inactive_corr <- function(nTestPeps = c(3, 10, 30),
                                                         contrasts.par = contrasts.par,
                                                         group = group,
                                                         pep_mapping_tbl = pep_mapping_tbl,
-                                                        stats = "t", 
+                                                        stat = "t", 
                                                         correlated = TRUE,
                                                         equal.correlation = FALSE,
                                                         pepC.estim = "sd",
@@ -446,7 +446,7 @@ main_sim_inactive_uncorr <- function(nTestPeps = c(3, 10, 30),
   
   ## simulate data
   AllDat <- do.call('rbind', 
-                    lapply(1:length(nTotalPeps), function(i) {
+                    lapply(seq_along(nTotalPeps), function(i) {
                       do.call('rbind', lapply(1:floor(nTotalPeps[i] / nTestPeps[i]), function(j) {
                         t(MASS::mvrnorm(n = nSamples * 2, 
                                         mu = pepwise.means[(nTestPeps[i] * (j-1) + 1):(nTestPeps[i] * j)], 
@@ -481,7 +481,7 @@ main_sim_inactive_uncorr <- function(nTestPeps = c(3, 10, 30),
                                                  contrasts.par = contrasts.par,
                                                  group = group,
                                                  pep_mapping_tbl = pep_mapping_tbl,
-                                                 stats = "t", 
+                                                 stat = "t", 
                                                  correlated = FALSE,
                                                  equal.correlation = FALSE,
                                                  pepC.estim = "sd",

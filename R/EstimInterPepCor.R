@@ -59,7 +59,7 @@ EstimInterPepCor <- function(dat, design,
   names(pep_lst) <- target_prot_ids
   ## calculate correlation
   inter.pep.cor.lst <-
-    sapply(target_prot_ids, function(x) {
+    unlist(lapply(target_prot_ids, function(x) {
       if (length(pep_lst[[x]]) >= 2) {
         if (equal.correlation) {
           inter.pep.cor <- FitLmerBySample(dat.m[pep_lst[[x]], ],
@@ -73,7 +73,7 @@ EstimInterPepCor <- function(dat, design,
         inter.pep.cor <- NA
       }
       return(inter.pep.cor)
-    })
+    }))
   names(inter.pep.cor.lst) <- target_prot_ids
   return(inter.pep.cor.lst)
 }

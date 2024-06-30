@@ -8,8 +8,16 @@
 \description{
 Peptide Set Test (PepSetTest) is a peptide-centric strategy to infer differentially expressed proteins in LC-MS/MS proteomics data. This test detects coordinated changes in the expression of peptides originating from the same protein and compares these changes against the rest of the peptidome. Compared to traditional aggregation-based approaches, the peptide set test demonstrates improved statistical power, yet controlling the Type I error rate correctly in most cases. This test can be valuable for discovering novel biomarkers and prioritizing drug targets, especially when the direct application of statistical analysis to protein data fails to provide substantial insights.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/JmWangBio/PepSetTest}
+  \item Report bugs at \url{https://github.com/JmWangBio/PepSetTest/issues}
+}
+
+}
 \author{
-\strong{Maintainer}: Junmin Wang \email{jmwang.bio@gmail.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Junmin Wang \email{jmwang.bio@gmail.com}
 
 }
 \keyword{internal}

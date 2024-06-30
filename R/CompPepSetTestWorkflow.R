@@ -53,19 +53,18 @@
 #' CompPepSetTestWorkflow(dat, contrasts.par = contrasts.par,
 #' group = group,
 #' pep_mapping_tbl = pep_mapping_tbl,
-#' stats = "t",
+#' stat = "t",
 #' correlated = TRUE,
 #' equal.correlation = TRUE,
 #' pepC.estim = "mad",
 #' logged = FALSE)
 #'
 #' # Store data as a SummarizedExperiment object
-#' library(dplyr)
 #' library(tibble)
 #' library(SummarizedExperiment)
-#' colData <- data.frame(sample = LETTERS[1:length(group)], group = group) %>% 
+#' colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) |> 
 #' column_to_rownames(var = "sample")
-#' rowData <- pep_mapping_tbl %>% column_to_rownames(var = "peptide")
+#' rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
 #' dat.nn <- dat
 #' rownames(dat.nn) <- NULL
 #' colnames(dat.nn) <- NULL
@@ -74,7 +73,7 @@
 #' CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
 #' group = "group",
 #' pep_mapping_tbl = "protein",
-#' stats = "t",
+#' stat = "t",
 #' correlated = TRUE,
 #' equal.correlation = TRUE,
 #' pepC.estim = "mad",
@@ -83,7 +82,7 @@
 CompPepSetTestWorkflow <- function(dat, contrasts.par, 
                                    group, 
                                    pep_mapping_tbl,
-                                   stats = c("t", "logFC"),
+                                   stat = c("t", "logFC"),
                                    correlated = FALSE,
                                    equal.correlation = FALSE,
                                    pepC.estim = c("sd", "mad"),
@@ -114,7 +113,7 @@ CompPepSetTestWorkflow <- function(dat, contrasts.par,
   ## run competitive peptide set test
   test_output <- CompPepSetTest(contrasts.res,
                                 pep_mapping_tbl = pep_mapping_tbl,
-                                stats = stats,
+                                stat = stat,
                                 cor_coef = inter.pep.cors,
                                 pepC.estim = pepC.estim)
   return(test_output)

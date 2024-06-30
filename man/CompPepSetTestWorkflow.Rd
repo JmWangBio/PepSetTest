@@ -9,7 +9,7 @@ CompPepSetTestWorkflow(
   contrasts.par,
   group,
   pep_mapping_tbl,
-  stats = c("t", "logFC"),
+  stat = c("t", "logFC"),
   correlated = FALSE,
   equal.correlation = FALSE,
   pepC.estim = c("sd", "mad"),
@@ -29,7 +29,7 @@ column name of the group in colData if dat is a SummarizedExperiment object.}
 \item{pep_mapping_tbl}{a table mapping peptides to proteins. Alternatively, it can be the
 column name of the protein in rowData if dat is a SummarizedExperiment object.}
 
-\item{stats}{statistics to be used in the peptide set test.
+\item{stat}{statistics to be used in the peptide set test.
 Options include "t" (t-statistic) and "logFC" (log2 fold change).}
 
 \item{correlated}{Boolean variable indicating whether peptides are assumed to be correlated.
@@ -83,19 +83,18 @@ contrasts.par <- "B-A"
 CompPepSetTestWorkflow(dat, contrasts.par = contrasts.par,
 group = group,
 pep_mapping_tbl = pep_mapping_tbl,
-stats = "t",
+stat = "t",
 correlated = TRUE,
 equal.correlation = TRUE,
 pepC.estim = "mad",
 logged = FALSE)
 
 # Store data as a SummarizedExperiment object
-library(dplyr)
 library(tibble)
 library(SummarizedExperiment)
-colData <- data.frame(sample = LETTERS[1:length(group)], group = group) \%>\% 
+colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) |> 
 column_to_rownames(var = "sample")
-rowData <- pep_mapping_tbl \%>\% column_to_rownames(var = "peptide")
+rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
 dat.nn <- dat
 rownames(dat.nn) <- NULL
 colnames(dat.nn) <- NULL
@@ -104,7 +103,7 @@ dat.se <- SummarizedExperiment(assays = list(int = dat.nn), colData = colData, r
 CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
 group = "group",
 pep_mapping_tbl = "protein",
-stats = "t",
+stat = "t",
 correlated = TRUE,
 equal.correlation = TRUE,
 pepC.estim = "mad",

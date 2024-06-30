@@ -1,9 +1,8 @@
 Package: PepSetTest
 Title: Peptide Set Test
-Version: 0.99.1
+Version: 0.99.2
 Authors@R: 
-    person("Junmin", "Wang", , "jmwang.bio@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person("Junmin", "Wang", , "jmwang.bio@gmail.com", role = c("aut", "cre"))
 Description: Peptide Set Test (PepSetTest) is a peptide-centric strategy to infer differentially expressed proteins in LC-MS/MS proteomics data. 
     This test detects coordinated changes in the expression of peptides originating from the same protein and compares these changes against the rest of the peptidome. 
     Compared to traditional aggregation-based approaches, the peptide set test demonstrates improved statistical power, yet controlling the Type I error rate correctly in most cases. 
@@ -17,7 +16,6 @@ Imports:
     dplyr,
     limma,
     lme4,
-    magrittr,
     MASS,
     matrixStats,
     reshape2,
@@ -26,6 +24,8 @@ Imports:
     SummarizedExperiment,
     methods
 Suggests:
-    statmod, knitr, rmarkdown, tidyr
+    statmod, BiocStyle, knitr, rmarkdown, tidyr
 biocViews: DifferentialExpression, Regression, Proteomics, MassSpectrometry
 VignetteBuilder: knitr
+URL: https://github.com/JmWangBio/PepSetTest
+BugReports: https://github.com/JmWangBio/PepSetTest/issues

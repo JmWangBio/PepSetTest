@@ -3,8 +3,10 @@
 #' Given peptide abundance and assignment of peptide sequences to proteins,
 #' aggregate peptide abundance values into protein abundance values.
 #'
-#' @param dat a dataframe or matrix of peptide abundance
-#' @param pep_mapping_tbl a table mapping peptides to proteins. "pep_mapping_tbl" and "dat" should contain the same peptides.
+#' @param dat a dataframe or matrix of peptide abundance, or a SummarizedExperiment object where 
+#' grouping and peptide-protein mapping are provided in colData and rowData, respectively.
+#' @param pep_mapping_tbl a table mapping peptides to proteins. Alternatively, it can be the
+#' column name of the protein in rowData if dat is a SummarizedExperiment object.
 #' @param method method of aggregation. Options including "sum" (summed peptide intensity)
 #' and "robreg" (robust regression with M-Estimation).
 #' @param logged Boolean variable indicating whether abundance data have been
@@ -27,10 +29,28 @@
 #'
 #' AggPeps(dat, pep_mapping_tbl, method = "sum",
 #' logged = FALSE)
+#' 
+#' # Store data as a SummarizedExperiment object
+#' library(tibble)
+#' library(SummarizedExperiment)
+#' rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
+#' dat.nn <- dat
+#' rownames(dat.nn) <- NULL
+#' colnames(dat.nn) <- NULL
+#' dat.se <- SummarizedExperiment(assays = list(int = dat.nn), rowData = rowData)
+#'
+#' AggPeps(dat.se, pep_mapping_tbl = "protein", method = "sum",
+#' logged = FALSE)
 #'
 AggPeps <- function(dat, pep_mapping_tbl,
                     method = c("sum", "robreg"),
                     logged = c(TRUE, FALSE)) {
+  ## extract information from dat if a SummarizedExperiment object
+  if (methods::is(dat, "SummarizedExperiment")) {
+    pep_mapping_tbl <- data.frame(peptide = rownames(SummarizedExperiment::rowData(dat)), 
+                                  protein = SummarizedExperiment::rowData(dat)[[pep_mapping_tbl]])
+    dat <- SummarizedExperiment::assay(dat)
+  }
   ## convert to original scale
   if (logged) {
     dat.m <- as.matrix(2^dat)
@@ -45,23 +65,21 @@ AggPeps <- function(dat, pep_mapping_tbl,
   })
   names(pep_lst) <- target_prot_ids
   ## obtain number of peptides for each protein
-  NPeptide_lst <- sapply(pep_lst, function(x) {
+  NPeptide_lst <- unlist(lapply(pep_lst, function(x) {
     length(x)
-  })
+  }))
   names(NPeptide_lst) <- target_prot_ids
   ## aggregate for each protein
-  aggfun <- NA
   if (method == "sum") {
-    aggfun <- "colSums"
-    prot.dat <- t(sapply(target_prot_ids, function(x) {
-      eval(parse(text = paste0(aggfun, "(dat.m[pep_lst[[x]], , drop = FALSE], na.rm = TRUE)")))
+    prot.dat <- do.call('rbind', lapply(target_prot_ids, function(x) {
+      colSums(dat.m[pep_lst[[x]], , drop = FALSE], na.rm = TRUE)
     }))
   } else if (method == "robreg") {
-    aggfun <- "RobustReg"
-    prot.dat <- t(sapply(target_prot_ids, function(x) {
-      eval(parse(text = paste0(aggfun, "(dat.m[pep_lst[[x]], , drop = FALSE])")))
+    prot.dat <- do.call('rbind', lapply(target_prot_ids, function(x) {
+      RobustReg(dat.m[pep_lst[[x]], , drop = FALSE])
     }))
   }
+  rownames(prot.dat) <- target_prot_ids
   if (method != "robreg")
     prot.dat <- log2(prot.dat)
   ## store results to list

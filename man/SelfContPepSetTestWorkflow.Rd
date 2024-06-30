@@ -64,12 +64,11 @@ pep_mapping_tbl = pep_mapping_tbl,
 logged = FALSE)
 
 # Store data as a SummarizedExperiment object
-library(dplyr)
 library(tibble)
 library(SummarizedExperiment)
-colData <- data.frame(sample = LETTERS[1:length(group)], group = group) \%>\% 
+colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) |>
 column_to_rownames(var = "sample")
-rowData <- pep_mapping_tbl \%>\% column_to_rownames(var = "peptide")
+rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
 dat.nn <- dat
 rownames(dat.nn) <- NULL
 colnames(dat.nn) <- NULL
