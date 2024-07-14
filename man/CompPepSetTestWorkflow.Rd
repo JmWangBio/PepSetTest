@@ -9,6 +9,7 @@ CompPepSetTestWorkflow(
   contrasts.par,
   group,
   pep_mapping_tbl,
+  covar = NULL,
   stat = c("t", "logFC"),
   correlated = FALSE,
   equal.correlation = FALSE,
@@ -28,6 +29,9 @@ column name of the group in colData if dat is a SummarizedExperiment object.}
 
 \item{pep_mapping_tbl}{a table mapping peptides to proteins. Alternatively, it can be the
 column name of the protein in rowData if dat is a SummarizedExperiment object.}
+
+\item{covar}{covariate matrix. Alternatively, it can be the column names of the covariates
+in colData if dat is a SummarizedExperiment object.}
 
 \item{stat}{statistics to be used in the peptide set test.
 Options include "t" (t-statistic) and "logFC" (log2 fold change).}
@@ -89,10 +93,11 @@ equal.correlation = TRUE,
 pepC.estim = "mad",
 logged = FALSE)
 
-# Store data as a SummarizedExperiment object
+# Store data as a SummarizedExperiment object; add covariates
 library(tibble)
 library(SummarizedExperiment)
-colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) |> 
+colData <- data.frame(sample = LETTERS[seq_along(group)], group = group, 
+sex = c("M", "F", "M", "F", "F", "M"), age = 1:6) |> 
 column_to_rownames(var = "sample")
 rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
 dat.nn <- dat
@@ -103,6 +108,7 @@ dat.se <- SummarizedExperiment(assays = list(int = dat.nn), colData = colData, r
 CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
 group = "group",
 pep_mapping_tbl = "protein",
+covar = c("sex", "age"),
 stat = "t",
 correlated = TRUE,
 equal.correlation = TRUE,

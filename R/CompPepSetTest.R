@@ -40,8 +40,14 @@
 #'
 #' fit.cont <- FitContrasts(dat, contrasts.par, group)
 #' cont.res <- EnframeContrastsRes(fit.cont)
+#' 
+#' # Run peptide set test based on t-statistics and standard deviation
 #' CompPepSetTest(cont.res, pep_mapping_tbl, stat = "t",
 #' cor_coef = 0, pepC.estim = "sd")
+#' 
+#' # Run peptide set test based on log2 fold change and median absolute deviation
+#' CompPepSetTest(cont.res, pep_mapping_tbl, stat = "logFC",
+#' cor_coef = 0, pepC.estim = "mad")
 #'
 CompPepSetTest <- function(result, pep_mapping_tbl,
                            stat = c("t", "logFC"),
@@ -84,11 +90,17 @@ CompPepSetTest <- function(result, pep_mapping_tbl,
   # assign zero corr. coef. for proteins with NA values (e.g., proteins with only one peptide)
   cor_coef_reordered[is.na(cor_coef_reordered)] <- 0
   ## t-test
-  test_output <- TTestwCor(result$t,
-                           pep_indices_lst,
-                           inter.pep.cor = cor_coef_reordered,
-                           pepC.estim = pepC.estim)
-
+  if (stat == "t") {
+    test_output <- TTestwCor(result$t,
+                             pep_indices_lst,
+                             inter.pep.cor = cor_coef_reordered,
+                             pepC.estim = pepC.estim)
+  } else {
+    test_output <- TTestwCor(result$logFC,
+                             pep_indices_lst,
+                             inter.pep.cor = cor_coef_reordered,
+                             pepC.estim = pepC.estim)
+  }
   ## merge with reg_tbl
   test_output <- test_output |>
     tibble::rownames_to_column(var = "protein") |>

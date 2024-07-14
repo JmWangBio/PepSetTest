@@ -7,6 +7,7 @@
 #' if group B is to be compared against group A)
 #' @param group list of group levels corresponding to each sample. The order of group
 #' levels needs to match that of samples in the feature abundance table.
+#' @param covar covariate matrix
 #' @param logged Boolean variable indicating whether data have been log-transformed
 #' @param NPeptide numeric vector indicating number of peptides aggregated for each protein. logNPeptide will be passed to limma-trend. Constant prior variance if null.
 #'
@@ -27,9 +28,14 @@
 #' group <- c(rep("A", 3), rep("B", 3))
 #' contrasts.par <- "B-A"
 #'
+#' # Run moderated t-test without covariates
 #' FitContrasts(dat, contrasts.par, group)
+#' 
+#' # Run moderated t-test with covariates
+#' covar <- matrix(c(1:6, 0, 1, 0, 1, 1, 0), nrow = 6, ncol = 2, byrow = FALSE)
+#' FitContrasts(dat, contrasts.par, group, covar = covar)
 #'
-FitContrasts <- function(dat, contrasts.par, group, 
+FitContrasts <- function(dat, contrasts.par, group, covar = NULL, 
                          logged = FALSE, NPeptide = NULL) {
   if (logged) {
     dat.m <- as.matrix(dat)
@@ -39,6 +45,12 @@ FitContrasts <- function(dat, contrasts.par, group,
   group <- factor(group)
   design.m <- stats::model.matrix(~ 0 + group)
   colnames(design.m) <- levels(group)
+  if (!is.null(covar)) {
+    if (is.null(colnames(covar))) {
+      colnames(covar) <- paste0("Covar", 1:ncol(covar))
+    }
+    design.m <- cbind(design.m, covar)
+  }
   fit <- limma::lmFit(dat.m, design.m)
   contrs <- limma::makeContrasts(contrasts = contrasts.par,
                                  levels = design.m)

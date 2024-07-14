@@ -60,8 +60,14 @@ contrasts.par <- "B-A"
 
 fit.cont <- FitContrasts(dat, contrasts.par, group)
 cont.res <- EnframeContrastsRes(fit.cont)
+
+# Run peptide set test based on t-statistics and standard deviation
 CompPepSetTest(cont.res, pep_mapping_tbl, stat = "t",
 cor_coef = 0, pepC.estim = "sd")
+
+# Run peptide set test based on log2 fold change and median absolute deviation
+CompPepSetTest(cont.res, pep_mapping_tbl, stat = "logFC",
+cor_coef = 0, pepC.estim = "mad")
 
 }
 \author{

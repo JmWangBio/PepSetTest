@@ -4,7 +4,14 @@
 \alias{FitContrasts}
 \title{Empirical Bayes moderated t-test}
 \usage{
-FitContrasts(dat, contrasts.par, group, logged = FALSE, NPeptide = NULL)
+FitContrasts(
+  dat,
+  contrasts.par,
+  group,
+  covar = NULL,
+  logged = FALSE,
+  NPeptide = NULL
+)
 }
 \arguments{
 \item{dat}{a dataframe or matrix of feature (e.g., peptide, protein) abundance}
@@ -14,6 +21,8 @@ if group B is to be compared against group A)}
 
 \item{group}{list of group levels corresponding to each sample. The order of group
 levels needs to match that of samples in the feature abundance table.}
+
+\item{covar}{covariate matrix}
 
 \item{logged}{Boolean variable indicating whether data have been log-transformed}
 
@@ -35,7 +44,12 @@ rownames(dat) <- paste0("Peptide", 1:500)
 group <- c(rep("A", 3), rep("B", 3))
 contrasts.par <- "B-A"
 
+# Run moderated t-test without covariates
 FitContrasts(dat, contrasts.par, group)
+
+# Run moderated t-test with covariates
+covar <- matrix(c(1:6, 0, 1, 0, 1, 1, 0), nrow = 6, ncol = 2, byrow = FALSE)
+FitContrasts(dat, contrasts.par, group, covar = covar)
 
 }
 \references{

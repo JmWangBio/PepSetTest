@@ -43,6 +43,8 @@ EstimInterPepCor <- function(dat, design,
                              equal.correlation = FALSE,
                              logged = FALSE) {
   dat <- dat[stats::complete.cases(dat), ]
+  ## remove redundant rows
+  dat <- dat[!duplicated(dat), ]
   if (logged) {
     dat.m <- as.matrix(dat)
   } else {

@@ -10,6 +10,8 @@
 #' grouping and peptide-protein mapping are provided in colData and rowData, respectively.
 #' @param group a vector of group levels corresponding to each sample. Alternatively, it can be the 
 #' column name of the group in colData if dat is a SummarizedExperiment object.
+#' @param covar covariate matrix. Alternatively, it can be the column names of the covariates
+#' in colData if dat is a SummarizedExperiment object.
 #' @param pep_mapping_tbl a table mapping peptides to proteins. Alternatively, it can be the
 #' column name of the protein in rowData if dat is a SummarizedExperiment object.
 #' @param correlated Boolean variable indicating whether peptides are assumed to be correlated.
@@ -59,10 +61,11 @@
 #' pepC.estim = "mad",
 #' logged = FALSE)
 #'
-#' # Store data as a SummarizedExperiment object
+#' # Store data as a SummarizedExperiment object; add covariates
 #' library(tibble)
 #' library(SummarizedExperiment)
-#' colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) |> 
+#' colData <- data.frame(sample = LETTERS[seq_along(group)], group = group, 
+#' sex = c("M", "F", "M", "F", "F", "M"), age = 1:6) |> 
 #' column_to_rownames(var = "sample")
 #' rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
 #' dat.nn <- dat
@@ -73,6 +76,7 @@
 #' CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
 #' group = "group",
 #' pep_mapping_tbl = "protein",
+#' covar = c("sex", "age"),
 #' stat = "t",
 #' correlated = TRUE,
 #' equal.correlation = TRUE,
@@ -82,6 +86,7 @@
 CompPepSetTestWorkflow <- function(dat, contrasts.par, 
                                    group, 
                                    pep_mapping_tbl,
+                                   covar = NULL,
                                    stat = c("t", "logFC"),
                                    correlated = FALSE,
                                    equal.correlation = FALSE,
@@ -92,15 +97,22 @@ CompPepSetTestWorkflow <- function(dat, contrasts.par,
     group <- SummarizedExperiment::colData(dat)[[group]]
     pep_mapping_tbl <- data.frame(peptide = rownames(SummarizedExperiment::rowData(dat)), 
                                   protein = SummarizedExperiment::rowData(dat)[[pep_mapping_tbl]])
+    if (!is.null(covar)) {
+      covar <- stats::model.matrix(stats::formula(paste("~", paste(covar, collapse = "+"))),
+                                   data = SummarizedExperiment::colData(dat))
+      check <- apply(covar, 2, function(x) all(x == 1))
+      covar <- as.matrix(covar[, !check])     
+    }
     dat <- SummarizedExperiment::assay(dat)
   }
   ## fit statistical model
-  eBayes.fit <- FitContrasts(dat, contrasts.par, group, logged = logged)
+  eBayes.fit <- FitContrasts(dat, contrasts.par, group, covar = covar, logged = logged)
   ## convert eBayes.fit to dataframe
   contrasts.res <- EnframeContrastsRes(eBayes.fit = eBayes.fit)
   ## construct design matrix
   group <- factor(group)
   design <- stats::model.matrix(~ 0 + group)
+  design <- cbind(design, covar)
   ## estimate inter-peptide correlation
   if (correlated) {
     inter.pep.cors <- EstimInterPepCor(dat, design,

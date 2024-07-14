@@ -9,6 +9,8 @@
 #' if group B is to be compared against group A)
 #' @param group a vector of group levels corresponding to each sample. Alternatively, it can be the 
 #' column name of the group in colData if dat is a SummarizedExperiment object.
+#' @param covar covariate matrix. Alternatively, it can be the column names of the covariates
+#' in colData if dat is a SummarizedExperiment object.
 #' @param npep.trend logical, should a number-of-peptide-trend be allowed for the prior
 #' variance? Default is constant prior variance.
 #' @param eb logical, whether to output the result from the empirical Bayes or ordinary approach.
@@ -45,10 +47,11 @@
 #' method = "sum",
 #' logged = FALSE)
 #'
-#' # Store data as a SummarizedExperiment object
+#' # Store data as a SummarizedExperiment object; add covariates
 #' library(tibble)
 #' library(SummarizedExperiment)
-#' colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) |> 
+#' colData <- data.frame(sample = LETTERS[seq_along(group)], group = group, 
+#' sex = c("M", "F", "M", "F", "F", "M"), age = 1:6) |> 
 #' column_to_rownames(var = "sample")
 #' rowData <- pep_mapping_tbl |> column_to_rownames(var = "peptide")
 #' dat.nn <- dat
@@ -58,12 +61,14 @@
 #'
 #' AggLimmaWorkflow(dat.se, contrasts.par = contrasts.par,
 #' group = "group",
+#' covar = c("sex", "age"),
 #' pep_mapping_tbl = "protein",
 #' method = "sum",
 #' logged = FALSE)
 #'
 AggLimmaWorkflow <- function(dat, contrasts.par, group,
                              pep_mapping_tbl,
+                             covar = NULL,
                              method = c("sum", "robreg"),
                              logged = c(TRUE, FALSE),
                              npep.trend = FALSE,
@@ -71,9 +76,15 @@ AggLimmaWorkflow <- function(dat, contrasts.par, group,
   ## extract information from dat if a SummarizedExperiment object
   if (methods::is(dat, "SummarizedExperiment")) {
     group <- SummarizedExperiment::colData(dat)[[group]]
-    pep_mapping_tbl <- data.frame(peptide = rownames(SummarizedExperiment::rowData(dat)), 
+    pep_mapping_tbl <- data.frame(peptide = rownames(SummarizedExperiment::rowData(dat)),
                                   protein = SummarizedExperiment::rowData(dat)[[pep_mapping_tbl]])
-    dat <- SummarizedExperiment::assay(dat)    
+    if (!is.null(covar)) {
+      covar <- stats::model.matrix(stats::formula(paste("~", paste(covar, collapse = "+"))),
+                                   data = SummarizedExperiment::colData(dat))
+      check <- apply(covar, 2, function(x) all(x == 1))
+      covar <- as.matrix(covar[, !check])      
+    }
+    dat <- SummarizedExperiment::assay(dat)
   }
   ## aggregate peptides
   prot.dat.lst <- AggPeps(dat, pep_mapping_tbl, method, logged = logged)
@@ -85,7 +96,8 @@ AggLimmaWorkflow <- function(dat, contrasts.par, group,
   }
   ## fit statistical model
   eBayes.fit <- FitContrasts(prot.dat, contrasts.par,
-                             group, logged = TRUE, NPeptide = prot.NPeptide)
+                             group, covar = covar,
+                             logged = TRUE, NPeptide = prot.NPeptide)
   ## convert eBayes.fit to dataframe
   contrasts.res <- EnframeContrastsRes(eBayes.fit = eBayes.fit, eb = eb) |>
     dplyr::rename("protein" = "feature")

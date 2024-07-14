@@ -65,15 +65,18 @@ Afterwards, let’s simulate a peptide-protein mapping table. Suppose the 500 de
 
 ```{r, eval = TRUE}
 # Generate a mapping table
-pep_mapping_tbl <- data.frame(peptide = paste0("Peptide", 1:500),
-                              protein = paste0("Protein", rep(1:100, each = 5)))
+pep_mapping_tbl <- data.frame(
+  peptide = paste0("Peptide", 1:500),
+  protein = paste0("Protein", rep(1:100, each = 5))
+  )
 ```
 
 Now that all the data are ready, we can run the peptide set test workflow as follows:
 
 ```{r, eval = TRUE}
 # Run the workflow
-result <- CompPepSetTestWorkflow(dat, contrasts.par = contrasts.par,
+result <- CompPepSetTestWorkflow(dat, 
+                                 contrasts.par = contrasts.par,
                                  group = group,
                                  pep_mapping_tbl = pep_mapping_tbl,
                                  stat = "t",
@@ -95,7 +98,8 @@ library(dplyr)
 library(tibble)
 library(SummarizedExperiment)
 
-colData <- data.frame(sample = LETTERS[seq_along(group)], group = group) %>% 
+colData <- data.frame(sample = LETTERS[seq_along(group)], 
+                      group = group) %>% 
   column_to_rownames(var = "sample")
 rowData <- pep_mapping_tbl %>% column_to_rownames(var = "peptide")
 dat.nn <- dat
@@ -109,7 +113,8 @@ dat.se <- SummarizedExperiment(assays = list(int = dat.nn),
 Afterwards, let's run the peptide set test workflow as follows:
 
 ```{r, eval = TRUE}
-result2 <- CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
+result2 <- CompPepSetTestWorkflow(dat.se, 
+                                  contrasts.par = contrasts.par,
                                   group = "group",
                                   pep_mapping_tbl = "protein",
                                   stat = "t",
@@ -120,5 +125,64 @@ result2 <- CompPepSetTestWorkflow(dat.se, contrasts.par = contrasts.par,
 ```
 
 This should produce the same results as in Example 1.
+
+## Example 3
+The peptide set test is also compatible with covariates. To see how it works, let's add covariates to the data from Example 2.
+
+```{r, eval = TRUE}
+library(dplyr)
+library(tibble)
+library(SummarizedExperiment)
+
+colData <- data.frame(sample = LETTERS[seq_along(group)], 
+                      group = group,
+                      sex = c("M", "F", "M", "F", "F", "M"),
+                      age = 1:6) %>% 
+  column_to_rownames(var = "sample")
+rowData <- pep_mapping_tbl %>% column_to_rownames(var = "peptide")
+dat.nn <- dat
+rownames(dat.nn) <- NULL
+colnames(dat.nn) <- NULL
+dat.se <- SummarizedExperiment(assays = list(int = dat.nn), 
+                               colData = colData, 
+                               rowData = rowData)
+```
+
+Afterwards, let's run the peptide set test workflow as follows:
+
+```{r, eval = TRUE}
+result3 <- CompPepSetTestWorkflow(dat.se, 
+                                  contrasts.par = contrasts.par,
+                                  group = "group",
+                                  pep_mapping_tbl = "protein",
+                                  covar = c("sex", "age"),
+                                  stat = "t",
+                                  correlated = TRUE,
+                                  equal.correlation = TRUE,
+                                  pepC.estim = "mad",
+                                  logged = FALSE)
+```
+
+## Example 4
+Besides the competitive peptide set test, this R package also provides options to conduct the traditional LIMMA workflow and the self-contained peptide set test. To see how it works, let's use the same data from Example 3.
+
+```{r, eval = TRUE}
+result4 <- AggLimmaWorkflow(dat.se, 
+                            contrasts.par = contrasts.par,
+                            group = "group",
+                            pep_mapping_tbl = "protein",
+                            covar = c("sex", "age"),
+                            method = "robreg",
+                            logged = FALSE)
+```
+
+```{r, eval = TRUE}
+result4_2 <- SelfContPepSetTestWorkflow(dat.se, 
+                                        contrasts.par = contrasts.par,
+                                        group = "group",
+                                        pep_mapping_tbl = "protein",
+                                        covar = c("sex", "age"),
+                                        logged = FALSE)
+```
 
 ## References

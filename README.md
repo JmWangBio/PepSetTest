@@ -37,10 +37,10 @@ install_github("JmWangBio/PepSetTest")
 
 Note: please make sure that devtools is installed.
 
-In the rest of this tutorial, I will provide a few examples to
-demonstrate how to use this package.
+Next, I will provide one example to demonstrate how to get started with this package. 
+Examples of advanced usage can be found in the vignettes.
 
-## Example 1
+## Example 
 
 In this example, I will show how a workflow based on the peptide set
 test can be directly applied to the peptide-level abundance data. First,
@@ -121,108 +121,9 @@ result <- CompPepSetTestWorkflow(dat, contrasts.par = contrasts.par,
                                  logged = FALSE)
 ```
 
+Note that without good reason, we should almost always let PepSetTest estimate 
+inter-peptide correlations on its own by setting correlated = TRUE. 
 Check the documentation to learn more about each parameter.
-
-## Example 2
-
-In observational designs, a linear model accounting for co-variates
-(e.g., sex, age) may be used to eliminate confounding. Next, I will
-demonstrate how the peptide set test can be combined with a
-peptide-level linear model to infer differentially expressed proteins.
-First, let’s simulate some peptide abundance data. Suppose that in a
-hypothetical proteomics study of cancer, 500 peptides in total are
-detected. The diseased group (i.e., D) and healthy group (i.e. H) have
-six samples each: three samples collected from donors of either sex.
-Thirty peptides are more abundant in the diseased group than in the
-healthy group by an order of 2 on the log2 scale. The same thirty
-peptides are also more abundant in the male group than in the female
-group by an order of 1 on the log2 scale.
-
-``` r
-# Load library
-library(PepSetTest)
-library(tidyverse)
-
-# Generate random peptide data
-dat <- matrix(rnorm(6000), ncol = 12)
-dat[1:30, 7:12] <- dat[1:30, 7:12] + 2
-dat[1:30, c(1:3, 7:9)] <- dat[1:30, c(1:3, 7:9)] + 1
-dat <- 2^dat
-colnames(dat) <- paste0("Sample", 1:12)
-rownames(dat) <- paste0("Peptide", 1:500)
-
-# Convert data from wide format to long format
-dat.long <- dat %>%
-  as.data.frame(.) %>%
-  rownames_to_column(var = "peptide") %>%
-  pivot_longer(!peptide, names_to = "sample",
-               values_to = "abundance")
-```
-
-Next, let’s generate the group labels and contrasts.
-
-``` r
-# Generate group labels and contrasts
-group <- c(rep("H", 6), rep("D", 6))
-sex <- rep(rep(c("M", "F"), each = 3), 2)
-contrasts.par <- "D-H"
-sample_metadata_mapping <- data.frame(sample = paste0("Sample", 1:12),
-                                      group = group, 
-                                      sex = sex)
-dat.long <- dat.long %>%
-  inner_join(sample_metadata_mapping, by = "sample")
-```
-
-Afterwards, let’s simulate a peptide-protein mapping table.
-
-``` r
-# Generate a mapping table
-pep_mapping_tbl <- data.frame(peptide = paste0("Peptide", 1:500),
-                              protein = paste0("Protein", rep(1:100, each = 5)))
-```
-
-All data have been simulated. To analyze the data, let’s fit the peptide-level linear model to the data.
-
-``` r
-# Fit linear model for every peptide
-contrasts_res <- as.data.frame(
-  t(sapply(unique(pep_mapping_tbl$peptide), 
-           function(x) {
-             fit <- lm(abundance ~ group + sex,
-                       data = dat.long %>% filter(peptide == x))
-             logfc <- -as.numeric(coef(summary(fit))[, "Estimate"]["groupH"])
-             t_stat <- -as.numeric(coef(summary(fit))[, "t value"]["groupH"])
-             p_val <- as.numeric(coef(summary(fit))[, "Pr(>|t|)"]["groupH"])
-             return(c(x, logfc, t_stat, p_val))
-           }))
-) %>% 
-  remove_rownames() %>%
-  `colnames<-`(c("feature", "logFC", "t", "P.Value")) %>%
-  mutate_at(c("logFC", "t", "P.Value"), as.numeric) %>%
-  mutate(adj.P.Val = p.adjust(P.Value, method = "BY"))
-```
-
-The inter-peptide correlation coefficients should be estimated prior to running
-the peptide set test. Afterwards, the peptide set test can be run:
-
-``` r
-# Estimate inter-peptide correlation coefficients
-group <- factor(group)
-sex <- factor(sex)
-design.m <- stats::model.matrix(~ 0 + group + sex)
-pep_cors <- EstimInterPepCor(dat,
-                             design.m,
-                             pep_mapping_tbl, 
-                             equal.correlation = TRUE,
-                             logged = FALSE)
-
-# Run the peptide set test
-result <- CompPepSetTest(contrasts_res,
-                         pep_mapping_tbl = pep_mapping_tbl,
-                         stat = "t",
-                         cor_coef = pep_cors,
-                         pepC.estim = "mad")
-```
 
 ## Data Analysis
 
