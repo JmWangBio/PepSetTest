@@ -1,6 +1,6 @@
 Package: PepSetTest
 Title: Peptide Set Test
-Version: 0.99.3
+Version: 0.99.5
 Authors@R: 
     person("Junmin", "Wang", , "jmwang.bio@gmail.com", role = c("aut", "cre"))
 Description: Peptide Set Test (PepSetTest) is a peptide-centric strategy to infer differentially expressed proteins in LC-MS/MS proteomics data. 

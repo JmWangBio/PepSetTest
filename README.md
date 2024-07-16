@@ -83,7 +83,7 @@ pep_mapping_tbl <- data.frame(peptide = paste0("Peptide", 1:500),
                               protein = paste0("Protein", rep(1:100, each = 5)))
 ```
 
-Now that all the data are ready, we can run the peptide set test
+Now that the data are ready, we can run the peptide set test
 workflow as follows:
 
 ``` r
