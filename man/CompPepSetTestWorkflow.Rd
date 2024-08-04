@@ -18,8 +18,9 @@ CompPepSetTestWorkflow(
 )
 }
 \arguments{
-\item{dat}{a dataframe or matrix of peptide abundance, or a SummarizedExperiment object where
-grouping and peptide-protein mapping are provided in colData and rowData, respectively.}
+\item{dat}{a dataframe or matrix of peptide abundance (row names should be peptide sequences or peptide IDs),
+or a SummarizedExperiment object where grouping and peptide-protein mapping are
+provided in colData and rowData, respectively.}
 
 \item{contrasts.par}{group levels to be compared separated by dash (e.g., "B-A"
 if group B is to be compared against group A)}
@@ -27,8 +28,9 @@ if group B is to be compared against group A)}
 \item{group}{a vector of group levels corresponding to each sample. Alternatively, it can be the
 column name of the group in colData if dat is a SummarizedExperiment object.}
 
-\item{pep_mapping_tbl}{a table mapping peptides to proteins. Alternatively, it can be the
-column name of the protein in rowData if dat is a SummarizedExperiment object.}
+\item{pep_mapping_tbl}{a table mapping peptides to proteins (it should include two columns named
+"peptide" and "protein"). Alternatively, it can be the column name of the protein in rowData
+if dat is a SummarizedExperiment object.}
 
 \item{covar}{covariate matrix. Alternatively, it can be the column names of the covariates
 in colData if dat is a SummarizedExperiment object.}

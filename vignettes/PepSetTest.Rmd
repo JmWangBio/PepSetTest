@@ -33,7 +33,12 @@ In LC-MS/MS proteomics, peptide abundance is traditionally collapsed into protei
 Unlike `limma`, no aggregation is performed in the peptide set test. Our peptide-centric approach fits a linear model to the peptide data followed by detection of coordinated changes in the expression of peptides originating from the same proteins. Compared to `limma`, the peptide set test demonstrates improved statistical power, yet controlling the Type I error rate correctly in most cases. Details of our method can be found in @PepSetTest.
 
 ## Using PepSetTest
-The peptide set test takes a peptide abundance table and a peptide-protein mapping table as input. Both tables can be easily extracted from the output of protein search softwares, including MaxQuant, ProteomeDiscoverer, Spectronaut, and DIA-NN. Once the computation is completed, the peptide set test returns the fold change, p-value, and adjusted p-value of each protein. Below I will provide a few examples using simulated data.
+The peptide set test takes a peptide abundance table and a peptide-protein mapping table as input. Both tables can be easily extracted from the output of protein search softwares, including MaxQuant, ProteomeDiscoverer, Spectronaut, and DIA-NN. Once the computation is completed, the peptide set test returns the fold change, p-value, and adjusted p-value of each protein. 
+
+Peptide abundance tables can contain a fair number of missing values. It is recommended that one 
+impose a threshold on the missing value percentage and filter the peptide abundance data using that threshold. For example, it is common to only keep peptides with missing values fewer than 30% for subsequent analysis. Alternatively, imputation or a combination of filtering and imputation should be applied prior to running the peptide set test.
+
+Below I will provide a few examples using simulated data.
 
 ## Example 1
 

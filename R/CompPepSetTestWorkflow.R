@@ -6,14 +6,16 @@
 #'
 #' @inheritParams AggLimmaWorkflow
 #' @inheritParams CompPepSetTest
-#' @param dat a dataframe or matrix of peptide abundance, or a SummarizedExperiment object where 
-#' grouping and peptide-protein mapping are provided in colData and rowData, respectively.
+#' @param dat a dataframe or matrix of peptide abundance (row names should be peptide sequences or peptide IDs), 
+#' or a SummarizedExperiment object where grouping and peptide-protein mapping are 
+#' provided in colData and rowData, respectively.
 #' @param group a vector of group levels corresponding to each sample. Alternatively, it can be the 
 #' column name of the group in colData if dat is a SummarizedExperiment object.
 #' @param covar covariate matrix. Alternatively, it can be the column names of the covariates
 #' in colData if dat is a SummarizedExperiment object.
-#' @param pep_mapping_tbl a table mapping peptides to proteins. Alternatively, it can be the
-#' column name of the protein in rowData if dat is a SummarizedExperiment object.
+#' @param pep_mapping_tbl a table mapping peptides to proteins (it should include two columns named 
+#' "peptide" and "protein"). Alternatively, it can be the column name of the protein in rowData 
+#' if dat is a SummarizedExperiment object.
 #' @param correlated Boolean variable indicating whether peptides are assumed to be correlated.
 #' If correlated, inter-peptide correlation will be estimated.
 #' @param equal.correlation Boolean variable indicating whether all pairwise

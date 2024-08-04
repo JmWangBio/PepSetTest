@@ -19,17 +19,21 @@
 #' FitLmerBySample(y, design)
 #'
 FitLmerBySample <- function(y, design) {
-  y <- t(apply(t(y), 2, function(ycol) {
-    X <- design[!is.na(ycol), , drop = FALSE]
-    ycol - design %*% solve(t(X) %*% X) %*% t(X) %*% t(t(ycol[!is.na(ycol)]))
-  }))
-  y_long <- reshape2::melt(y)
-  colnames(y_long) <- c("feature" , "sample", "val")
-  fit <- lme4::lmer(val ~ 1|sample, data = y_long)
-  res_dat <- as.data.frame(lme4::VarCorr(fit))
-  corr <- res_dat[res_dat$grp == "sample", "vcov"] / (
-    res_dat[res_dat$grp == "sample", "vcov"] +
-      res_dat[res_dat$grp == "Residual", "vcov"]
-  )
+  tryCatch({
+    y <- t(apply(t(y), 2, function(ycol) {
+      X <- design[!is.na(ycol), , drop = FALSE]
+      ycol - design %*% solve(t(X) %*% X) %*% t(X) %*% t(t(ycol[!is.na(ycol)]))
+    }))
+    y_long <- reshape2::melt(y)
+    colnames(y_long) <- c("feature" , "sample", "val")
+    fit <- lme4::lmer(val ~ 1|sample, data = y_long)
+    res_dat <- as.data.frame(lme4::VarCorr(fit))
+    corr <- res_dat[res_dat$grp == "sample", "vcov"] / (
+      res_dat[res_dat$grp == "sample", "vcov"] +
+        res_dat[res_dat$grp == "Residual", "vcov"]
+    )
+  }, error = function(cond) {
+    corr <- NA
+  })
   return(corr)
 }
