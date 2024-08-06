@@ -32,8 +32,9 @@ FitLmerBySample <- function(y, design) {
       res_dat[res_dat$grp == "sample", "vcov"] +
         res_dat[res_dat$grp == "Residual", "vcov"]
     )
+    return(corr)
   }, error = function(cond) {
     corr <- NA
+    return(corr)
   })
-  return(corr)
 }
